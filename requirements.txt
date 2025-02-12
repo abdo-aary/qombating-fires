@@ -1,3 +1,4 @@
 gpytorch~=1.14
 torch~=2.4.1
 matplotlib~=3.10.0
+qadence~=1.10.2
