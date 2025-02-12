@@ -12,7 +12,7 @@ root/
 │
 ├── src/                        # Source code for the project
 │   ├── __init__.py             # Makes src a Python module
-│   ├── data/                   # Scripts to preprocess and handle the data
+│   ├── prep/                   # Scripts to preprocess and handle the data
 │   ├── models/                 # Scripts that define the used models
 │   ├── qoptim/                 # Scripts used for quantum optimization
 │   ├── train/                  # Scripts used to train the models
