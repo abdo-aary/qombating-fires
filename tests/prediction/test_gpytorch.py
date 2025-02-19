@@ -9,14 +9,14 @@ def generate_data():
     """Generates training data"""
     train_x = torch.linspace(0, 1, 100)
     train_y = torch.sin(train_x * (2 * math.pi)) + torch.randn(train_x.size()) * math.sqrt(0.04)
-    return train_x, train_y
+    return train_x.to('cuda'), train_y.to('cuda')
 
 
 def train_model(train_x, train_y, num_iters=50):
     """Trains a GP model"""
     likelihood = gpytorch.likelihoods.GaussianLikelihood()
     kernel = gpytorch.kernels.RBFKernel()
-    model = GPModel(train_x=train_x, train_y=train_y, likelihood=likelihood, kernel=kernel)
+    model = GPModel(train_x=train_x, train_y=train_y, likelihood=likelihood, kernel=kernel).to('cuda')
 
     model.train()
     likelihood.train()
@@ -40,7 +40,7 @@ def evaluate_model(model, likelihood):
     likelihood.eval()
 
     with torch.no_grad(), gpytorch.settings.fast_pred_var():
-        test_x = torch.linspace(0, 1, 51)
+        test_x = torch.linspace(0, 1, 51).to('cuda')
         observed_pred = likelihood(model(test_x))
 
     return observed_pred

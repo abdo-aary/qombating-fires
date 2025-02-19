@@ -1,0 +1,25 @@
+name: CI (Self-Hosted)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: self-hosted  # Make sure this matches the labels on your runner if you gave it any custom labels.
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.12"  # Or whichever version you need
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run unittests
+        run: python -m unittest discover tests
