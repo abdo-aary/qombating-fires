@@ -1,5 +1,17 @@
-# qombating-fires
-Quantum against wildfires   
+<div align="center">
+  <h1>Quantum against wildfires</h1>
+</div>
+
+<div align="center">
+
+  ![Linting](https://github.com/abdo-aary/qombating-fires/actions/workflows/linting.yml/badge.svg) 
+  &nbsp;
+  ![Testing](https://github.com/abdo-aary/qombating-fires/actions/workflows/testing.yml/badge.svg) 
+  &nbsp;
+  ![License](https://img.shields.io/github/license/abdo-aary/qombating-fires)
+
+</div>
+
 
 
 ## Project structure
@@ -8,7 +20,7 @@ root/
 │
 ├── data/                       # Scripts to download the data
 │
-├── docs/                       # Project documentation
+├── docs/                       # Documentation of the project 
 │
 ├── notebooks/                  # Jupyter notebooks for exploration and presentation
 │
@@ -33,12 +45,14 @@ root/
 
 ## Contributing
  
-For detailed guidelines on how to contribute—covering our branching strategy, testing requirements, CI pipeline, and pull request process—please refer to our [CONTRIBUTING.md](docs/guides/CONTRIBUTING.md) file.
+For detailed guidelines on how to contribute—covering our branching strategy, testing requirements, CI pipeline, 
+and pull request process—please refer to our [CONTRIBUTING](docs/guides/CONTRIBUTING.md) file.
 
 
 ## Using Docker
 
-For detailed guidelines on how to build a docker image out of the [Dockerfile](Dockerfile), please refer to our [DOCKER_SETUP.md](docs/guides/DOCKER_SETUP.md) file.
+For detailed guidelines on how to build a docker image out of the [Dockerfile](Dockerfile), please refer to our 
+[DOCKER_SETUP](docs/guides/DOCKER_SETUP.md) file.
 
 
 
@@ -57,3 +71,5 @@ For detailed guidelines on how to build a docker image out of the [Dockerfile](D
 <!-- Utility commands -->
 <!-- Export python path: ``export PYTHONPATH=${PYTHONPATH}:${pwd}``-->
 <!-- Run jupyter-lab server ``jupyter lab --ip 10.44.83.233 --port 8899 --no-browser`` -->
+
+<!-- Run the self-hosted runner via:  -->

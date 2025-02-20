@@ -1,4 +1,4 @@
-name: CI (Self-Hosted & Local)
+name: Testing (Self-Hosted & Local)
 
 on:
   push:
@@ -38,10 +38,10 @@ jobs:
 
             # If running locally, use volume mounting to sync project files dynamically
             if [ "$local_run" == "true" ]; then
-              docker run --rm -dit --name ci_container --gpus all -v $(pwd):/app qombat_image bash
+              docker run --rm -dit --name ci_container_testing --gpus all -v $(pwd):/app qombat_image bash
             else
               # On GitHub Actions, copy files inside the container instead of using mounts
-              docker run --rm -dit --name ci_container --gpus all qombat_image bash
+              docker run --rm -dit --name ci_container_testing --gpus all qombat_image bash
             fi
           else
             echo "No prebuilt image found. Running on host."
@@ -53,7 +53,7 @@ jobs:
         if: env.local_run == 'false'
         run: |
           echo "Copying latest project files into container..."
-          docker cp . ci_container:/app/
+          docker cp . ci_container_testing:/app/
 
       # Step 5: Check for missing dependencies and update them as needed
       - name: Update dependencies if needed
@@ -71,7 +71,7 @@ jobs:
           else
             # If running in a Docker container, update dependencies inside the container
             echo "Checking dependencies inside container..."
-            docker exec ci_container pip install --no-cache-dir -r requirements.txt
+            docker exec ci_container_testing pip install --no-cache-dir -r requirements.txt
           fi
 
       # Step 6: Run unit tests inside the container (or directly on the host for local runs)
@@ -80,17 +80,17 @@ jobs:
           if [ "$local_run" == "true" ]; then
             python -m unittest discover tests
           else
-            docker exec ci_container python -m unittest discover tests
+            docker exec ci_container_testing python -m unittest discover tests
           fi
 
       # Step 7: Cleanup - Stop and remove the container after the tests
       - name: Cleanup Docker container (if used)
         if: always()
         run: |
-          if docker ps -a --format '{{.Names}}' | grep -q "^ci_container$"; then
+          if docker ps -a --format '{{.Names}}' | grep -q "^ci_container_testing$"; then
             echo "Stopping and removing Docker container..."
-            docker stop ci_container 2>/dev/null || true
-            docker rm ci_container 2>/dev/null || true
+            docker stop ci_container_testing 2>/dev/null || true
+            docker rm ci_container_testing 2>/dev/null || true
           else
             echo "Container already removed. Skipping cleanup."
           fi
