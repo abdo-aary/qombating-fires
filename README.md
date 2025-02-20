@@ -8,7 +8,7 @@
   &nbsp;
   ![Testing](https://github.com/abdo-aary/qombating-fires/actions/workflows/testing.yml/badge.svg) 
   &nbsp;
-  ![License](https://img.shields.io/github/license/abdo-aary/qombating-fires)
+  ![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 
 </div>
 
