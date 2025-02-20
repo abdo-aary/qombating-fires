@@ -20,7 +20,7 @@ root/
 │
 ├── data/                       # Scripts to download the data
 │
-├── docs/                       # Project documentation
+├── docs/                       # Documentation of the project 
 │
 ├── notebooks/                  # Jupyter notebooks for exploration and presentation
 │
