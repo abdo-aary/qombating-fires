@@ -1,0 +1,96 @@
+name: CI (Self-Hosted & Local)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    # Dynamically select runner:
+    # - If running via `act` locally, use `ubuntu-latest`
+    # - If running on GitHub Actions, use `self-hosted`
+    runs-on: ${{ (github.actor == 'nektos/act') && 'ubuntu-latest' || 'self-hosted' }}
+
+    steps:
+      # Step 1: Detect whether the job is running locally via `act` or on GitHub Actions
+      - name: Check if running locally with act
+        id: check-local
+        run: |
+          if [ "$GITHUB_ACTIONS" != "true" ]; then
+            echo "Running locally with act."
+            echo "local_run=true" >> $GITHUB_ENV
+          else
+            echo "Running on GitHub Actions."
+            echo "local_run=false" >> $GITHUB_ENV
+          fi
+
+      # Step 2: Checkout the repository code
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      # Step 3: Use prebuilt Docker image if available
+      - name: Start or Attach to Prebuilt Container
+        run: |
+          if docker images | grep -q "qombat_image"; then
+            echo "Using prebuilt qombat_image."
+
+            # If running locally, use volume mounting to sync project files dynamically
+            if [ "$local_run" == "true" ]; then
+              docker run --rm -dit --name ci_container --gpus all -v $(pwd):/app qombat_image bash
+            else
+              # On GitHub Actions, copy files inside the container instead of using mounts
+              docker run --rm -dit --name ci_container --gpus all qombat_image bash
+            fi
+          else
+            echo "No prebuilt image found. Running on host."
+          fi
+
+      # Step 4: Update the project files inside the container (for CI runs only)
+      # - This ensures that the latest project files (code) are available inside the container
+      - name: Update project files inside container (CI mode only)
+        if: env.local_run == 'false'
+        run: |
+          echo "Copying latest project files into container..."
+          docker cp . ci_container:/app/
+
+      # Step 5: Check for missing dependencies and update them as needed
+      - name: Update dependencies if needed
+        run: |
+          echo "Checking for missing dependencies..."
+          if [ "$local_run" == "true" ]; then
+            # If running locally, check and install only missing dependencies
+            missing_packages=$(pip freeze | grep -vxF -f <(cat requirements.txt | sed 's/==.*//') || true)
+            if [ -n "$missing_packages" ]; then
+              echo "Missing dependencies found. Installing..."
+              pip install -r requirements.txt
+            else
+              echo "All dependencies already installed."
+            fi
+          else
+            # If running in a Docker container, update dependencies inside the container
+            echo "Checking dependencies inside container..."
+            docker exec ci_container pip install --no-cache-dir -r requirements.txt
+          fi
+
+      # Step 6: Run unit tests inside the container (or directly on the host for local runs)
+      - name: Run unittests
+        run: |
+          if [ "$local_run" == "true" ]; then
+            python -m unittest discover tests
+          else
+            docker exec ci_container python -m unittest discover tests
+          fi
+
+      # Step 7: Cleanup - Stop and remove the container after the tests
+      - name: Cleanup Docker container (if used)
+        if: always()
+        run: |
+          if docker ps -a --format '{{.Names}}' | grep -q "^ci_container$"; then
+            echo "Stopping and removing Docker container..."
+            docker stop ci_container 2>/dev/null || true
+            docker rm ci_container 2>/dev/null || true
+          else
+            echo "Container already removed. Skipping cleanup."
+          fi

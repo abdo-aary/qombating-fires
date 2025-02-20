@@ -8,6 +8,8 @@ root/
 │
 ├── data/                       # Scripts to download the data
 │
+├── docs/                       # Project documentation
+│
 ├── notebooks/                  # Jupyter notebooks for exploration and presentation
 │
 ├── src/                        # Source code for the project
@@ -22,12 +24,35 @@ root/
 ├── storage/                    # Experiments' results. Directory generated automatically, with content not handled 
 │                               # by Git 
 │
-├── tests/                      # Test cases to ensure your code behaves as expected
+├── tests/                      # Test cases to ensure the code behaves as expected. These used in CI/CD as well
 │
 ├── requirements.txt            # The dependencies file for reproducing the analysis environment
 │
 └── README.md                   # The top-level README for developers using this project
 ````
+
+## Contributing
+ 
+For detailed guidelines on how to contribute—covering our branching strategy, testing requirements, CI pipeline, and pull request process—please refer to our [CONTRIBUTING.md](docs/guides/CONTRIBUTING.md) file.
+
+
+## Using Docker
+
+For detailed guidelines on how to build a docker image out of the [Dockerfile](Dockerfile), please refer to our [DOCKER_SETUP.md](docs/guides/DOCKER_SETUP.md) file.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <!-- Utility commands -->
 <!-- Export python path: ``export PYTHONPATH=${PYTHONPATH}:${pwd}``-->
