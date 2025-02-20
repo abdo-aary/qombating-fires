@@ -8,7 +8,7 @@
   &nbsp;&nbsp;&nbsp;
   ![Testing](https://github.com/abdo-aary/qombating-fires/actions/workflows/ci_self_hosted.yml/badge.svg) 
   &nbsp;&nbsp;&nbsp;
-  ![License](https://img.shields.io/github/license/abdo-aary/qombating-fires/docs)
+  ![License](https://img.shields.io/github/license/abdo-aary/qombating-fires/docs/LICENSE)
 
 </div>
 
