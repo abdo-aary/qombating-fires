@@ -1,4 +1,4 @@
-name: Testing (Self-Hosted & Local)
+name: Testing   #(Self-Hosted & Local)
 
 on:
   push:
