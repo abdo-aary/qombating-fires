@@ -4,7 +4,7 @@
 
 <div align="center">
 
-  ![Linting](https://github.com/abdo-aary/qombating-fires/actions/workflows/linting.yml/badge.svg) 
+  ![Linting](https://github.com/abdo-aary/qombating-fires/actions/workflows/lint.yml/badge.svg) 
   &nbsp;
   ![Testing](https://github.com/abdo-aary/qombating-fires/actions/workflows/testing.yml/badge.svg) 
   &nbsp;
