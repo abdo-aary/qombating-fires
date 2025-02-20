@@ -1,4 +1,4 @@
-name: Linting (Self-Hosted & Local)
+name: Linting   #(Self-Hosted & Local)
 
 on:
   push:
