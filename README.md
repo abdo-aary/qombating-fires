@@ -5,11 +5,10 @@
 <div align="center">
 
   ![Linting](https://github.com/abdo-aary/qombating-fires/actions/workflows/linting.yml/badge.svg) 
-  &nbsp;&nbsp;&nbsp;
-  ![Testing](https://github.com/abdo-aary/qombating-fires/actions/workflows/ci_self_hosted.yml/badge.svg) 
-  &nbsp;&nbsp;&nbsp;
-  ![License](docs/LICENSE)
-
+  &nbsp;
+  ![Testing](https://github.com/abdo-aary/qombating-fires/actions/workflows/testing.yml/badge.svg) 
+  &nbsp;
+  ![License](https://img.shields.io/github/license/abdo-aary/qombating-fires)
 
 </div>
 
@@ -72,3 +71,5 @@ For detailed guidelines on how to build a docker image out of the [Dockerfile](D
 <!-- Utility commands -->
 <!-- Export python path: ``export PYTHONPATH=${PYTHONPATH}:${pwd}``-->
 <!-- Run jupyter-lab server ``jupyter lab --ip 10.44.83.233 --port 8899 --no-browser`` -->
+
+<!-- Run the self-hosted runner via:  -->
