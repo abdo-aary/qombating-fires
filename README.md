@@ -1,12 +1,17 @@
-<h1 style="text-align: center;"> Quantum against wildfires</h1>
-
-
-<div style="text-align: center;">
-
-![Linting](https://github.com/abdo-aary/qombating-fires/actions/workflows/lint.yml/badge.svg) 
-![Testing](https://github.com/abdo-aary/qombating-fires/actions/workflows/ci.yml/badge.svg) 
-![License](https://img.shields.io/github/license/abdo-aary/qombating-fires)
+<div align="center">
+  <h1>Quantum against wildfires</h1>
 </div>
+
+<div align="center">
+
+  ![Linting](https://github.com/abdo-aary/qombating-fires/actions/workflows/linting.yml/badge.svg) 
+  &nbsp;&nbsp;&nbsp;
+  ![Testing](https://github.com/abdo-aary/qombating-fires/actions/workflows/ci_self_hosted.yml/badge.svg) 
+  &nbsp;&nbsp;&nbsp;
+  ![License](https://img.shields.io/github/license/abdo-aary/qombating-fires)
+
+</div>
+
 
 
 ## Project structure
