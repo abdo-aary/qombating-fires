@@ -8,6 +8,8 @@ root/
 │
 ├── data/                       # Scripts to download the data
 │
+├── docs/                       # Project documentation
+│
 ├── notebooks/                  # Jupyter notebooks for exploration and presentation
 │
 ├── src/                        # Source code for the project
@@ -22,7 +24,7 @@ root/
 ├── storage/                    # Experiments' results. Directory generated automatically, with content not handled 
 │                               # by Git 
 │
-├── tests/                      # Test cases to ensure the code behaves as expected
+├── tests/                      # Test cases to ensure the code behaves as expected. These used in CI/CD as well
 │
 ├── requirements.txt            # The dependencies file for reproducing the analysis environment
 │
