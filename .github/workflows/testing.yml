@@ -74,13 +74,13 @@ jobs:
             docker exec ci_container_testing pip install --no-cache-dir -r requirements.txt
           fi
 
-      # Step 6: Run unit tests inside the container (or directly on the host for local runs)
-      - name: Run unittests
+      # Step 6: pytest inside the container (or directly on the host for local runs)
+      - name: Run pytest
         run: |
           if [ "$local_run" == "true" ]; then
-            python -m unittest discover tests
+            pytest tests --maxfail=1 --disable-warnings -v
           else
-            docker exec ci_container_testing python -m unittest discover tests
+            docker exec ci_container_testing pytest tests --maxfail=1 --disable-warnings -v
           fi
 
       # Step 7: Cleanup - Stop and remove the container after the tests

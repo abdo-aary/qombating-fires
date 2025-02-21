@@ -3,3 +3,4 @@ torch~=2.4.1
 matplotlib~=3.10.0
 qadence~=1.10.2
 flake8~=7.1.2
+pytest~=8.3.4
