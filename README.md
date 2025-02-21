@@ -18,18 +18,27 @@
 ````
 root/
 │
-├── data/                       # Scripts to download the data
-│
 ├── docs/                       # Documentation of the project 
 │
 ├── notebooks/                  # Jupyter notebooks for exploration and presentation
 │
-├── src/                        # Source code for the project
+├── data/                       # Scripts to download the data
 │   ├── __init__.py             # Makes src a Python module
-│   ├── prep/                   # Scripts to preprocess and handle the data
+│   ├── get/                    # Scripts that define how to get the data
+│   ├── prep/                   # Data preprocessing scripts
+│   ├── utils/                  # Utility tools used for the data handling
+│   └── view/                   # Scripts to create data visualizations
+|
+├── bassir/                     # Source code for the quantum predictor
+│   ├── __init__.py             # Makes src a Python module
 │   ├── models/                 # Scripts that define the used models
-│   ├── qoptim/                 # Scripts used for quantum optimization
 │   ├── train/                  # Scripts used to train the models
+│   ├── utils/                  # Utility tools used through src code
+│   └── view/                   # Scripts to create exploratory and results oriented visualizations
+│
+├── guru/                       # Source code for the quantum optimizer (responder)
+│   ├── __init__.py             # Makes src a Python module
+│   ├── optimizers/             # Scripts that define quantum optimizers
 │   ├── utils/                  # Utility tools used through src code
 │   └── view/                   # Scripts to create exploratory and results oriented visualizations
 │
