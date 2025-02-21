@@ -2,7 +2,7 @@ import math
 import torch
 import gpytorch
 import unittest
-from src.models.gp_models.gp_model import GPModel
+from bassir.models.gp_models.gp_model import GPModel
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
