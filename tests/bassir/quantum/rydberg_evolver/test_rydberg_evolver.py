@@ -148,4 +148,4 @@ def test_forward_cuda_nontrivial_mask():
 
 
 if __name__ == '__main__':
-    pytest.main([__file__, "-vv", "-W", "all"])
+    pytest.main([__file__])

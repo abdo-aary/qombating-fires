@@ -1,8 +1,6 @@
 # %%
-from torch import nn, Tensor, randn
-
+from torch import nn, Tensor
 from bassir.utils.metrics import binary_activation
-from bassir.models.quantum.qutils import get_default_register_topology
 from networkx import Graph
 
 
