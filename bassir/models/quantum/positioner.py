@@ -7,15 +7,16 @@ from networkx import Graph
 class Positioner(nn.Module):
     def __init__(self, dim: int, traps: Graph, projector: nn.Module = None, tau: float = 1.0):
         """
+
         :param dim: Input feature dimension.
         :param traps: Graph representing the available trap locations.
         :param tau: Temperature for the binary activation.
         """
         super().__init__()
-        self.traps = traps
+        n_qubits = len(traps)
         self.dim = dim
         self.tau = tau
-        self.projector = nn.Linear(dim, len(traps)) if not projector else projector
+        self.projector = nn.Linear(dim, n_qubits) if not projector else projector
 
     def forward(self, x: Tensor) -> Tensor:
         logits = self.projector(x)

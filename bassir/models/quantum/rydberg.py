@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch import Tensor, vmap
 from networkx import Graph, adjacency_matrix
 from math import pi
+from bassir.models.quantum.qutils import get_binary_representation
 
 # Precompute einsum strings for n in {1,...,10}
 EINSUM_STRINGS = {
@@ -10,17 +11,6 @@ EINSUM_STRINGS = {
        ''.join([chr(97 + k) for k in range(n)] + [chr(65 + k) for k in range(n)])
     for n in range(1, 11)
 }
-
-
-def get_binary_tensor(num_qubits: int) -> Tensor:
-    """
-    Returns a tensor of shape (2**num_qubits, num_qubits) where each row is the binary representation
-    (with 0s and 1s) of the integers 0,...,2**num_qubits - 1.
-    """
-    num_values = 2 ** num_qubits
-    indices = torch.arange(num_values, dtype=torch.long)
-    binary_tensor = ((indices.unsqueeze(1) & (1 << torch.arange(num_qubits))) > 0).long()
-    return binary_tensor  # Shape: (2**num_qubits, num_qubits)
 
 
 def n_operator() -> Tensor:
@@ -48,7 +38,7 @@ def kron_product(matrices: torch.Tensor) -> torch.Tensor:
 class RydbergEvolver(nn.Module):
     def __init__(self, traps: Graph,
                  c_6_ceoff: float = 866,
-                 reference_distance_d_0: float = 3,
+                 reference_distance_d_0: float = 3.0,
                  initial_state: Tensor = None):
         """
         Implements the Rydberg-based time-independent evolution.
@@ -63,6 +53,8 @@ class RydbergEvolver(nn.Module):
         super().__init__()
         self.n_qubits = len(traps)
 
+        self.reference_distance_d_0 = 3.0
+
         self.interaction_weight = c_6_ceoff / reference_distance_d_0 ** 6
 
         self.raw_params = nn.ParameterDict({
@@ -73,8 +65,8 @@ class RydbergEvolver(nn.Module):
         })
 
         # Precompute the binary index tensor (depends only on n_qubits).
-        binary_tensor = get_binary_tensor(self.n_qubits)  # Shape: (2**n_qubits, n_qubits)
-        self.register_buffer("binary_tensor", binary_tensor)
+        binary_representation = get_binary_representation(self.n_qubits)  # Shape: (2**n_qubits, n_qubits)
+        self.register_buffer("binary_representation", binary_representation)
 
         # Compute the interaction adjacency matrix.
         adj_matrix = Tensor(adjacency_matrix(traps).toarray())
