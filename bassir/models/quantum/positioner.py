@@ -16,7 +16,11 @@ class Positioner(nn.Module):
         n_qubits = len(traps)
         self.dim = dim
         self.tau = tau
-        self.projector = nn.Linear(dim, n_qubits) if not projector else projector
+
+        # Prepare the projector submodule
+        self.projector = nn.Sequential(nn.Linear(dim, (n_qubits + dim) // 2),
+                                       nn.ReLU(),
+                                       nn.Linear((n_qubits + dim) // 2, n_qubits)) if not projector else projector
 
     def forward(self, x: Tensor) -> Tensor:
         logits = self.projector(x)

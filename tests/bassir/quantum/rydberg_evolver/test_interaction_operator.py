@@ -10,9 +10,10 @@ def test_interaction_operator_nqubits_1():
     (1, 1, 2, 2) and equal the single-qubit number operator.
     """
     traps = get_default_register_topology(topology="all_to_all", n_qubits=1)
-    evolver = RydbergEvolver(traps=traps)
+    evolver = RydbergEvolver(traps=traps, dim=10)
     computed_tensor = evolver._compute_interaction_operator_vectorized()
     expected_shape = (1, 1, 2, 2)
+
     assert computed_tensor.shape == expected_shape, (
         f"Expected shape {expected_shape}, got {computed_tensor.shape}"
     )
@@ -31,7 +32,7 @@ def test_interaction_operator_nqubits_2_values():
       - At (0,1) and (1,0): expected = n_operator ⊗ n_operator.
     """
     traps = get_default_register_topology(topology="all_to_all", n_qubits=2)
-    evolver = RydbergEvolver(traps=traps)
+    evolver = RydbergEvolver(traps=traps, dim=10)
     computed_tensor = evolver._compute_interaction_operator_vectorized()
     expected_shape = (2, 2, 4, 4)
     assert computed_tensor.shape == expected_shape, (
@@ -71,7 +72,7 @@ def test_interaction_operator_nqubits_3_values():
       - At (1,2) and (2,1): expected = I_2 ⊗ n_operator ⊗ n_operator.
     """
     traps = get_default_register_topology(topology="all_to_all", n_qubits=3)
-    evolver = RydbergEvolver(traps=traps)
+    evolver = RydbergEvolver(traps=traps, dim=10)
     computed_tensor = evolver._compute_interaction_operator_vectorized()
     expected_shape = (3, 3, 8, 8)
     assert computed_tensor.shape == expected_shape, (
