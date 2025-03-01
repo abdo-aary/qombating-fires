@@ -2,7 +2,7 @@ import pytest
 import torch
 from math import pi
 from bassir.models.quantum.rydberg import RydbergEvolver
-from bassir.models.quantum.qutils import get_default_register_topology
+from bassir.utils.qutils import get_default_register_topology
 
 
 # =============================================================================

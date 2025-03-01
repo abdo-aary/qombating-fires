@@ -1,12 +1,13 @@
 # %%
 from torch import nn, Tensor
-from bassir.utils.metrics import binary_activation
+from bassir.utils.metrics import binary_activation_with_min_activation  #binary_activation
 from networkx import Graph
 
 
 class Positioner(nn.Module):
-    def __init__(self, dim: int, traps: Graph, projector: nn.Module = None, tau: float = 1.0):
+    def __init__(self, dim: int, traps: Graph, projector: nn.Module = None):
         """
+        Implements the spatial arrangements generating function x \mapsto R_{\theta_1}(x).
 
         :param dim: Input feature dimension.
         :param traps: Graph representing the available trap locations.
@@ -15,7 +16,6 @@ class Positioner(nn.Module):
         super().__init__()
         n_qubits = len(traps)
         self.dim = dim
-        self.tau = tau
 
         # Prepare the projector submodule
         self.projector = nn.Sequential(nn.Linear(dim, (n_qubits + dim) // 2),
@@ -24,5 +24,5 @@ class Positioner(nn.Module):
 
     def forward(self, x: Tensor) -> Tensor:
         logits = self.projector(x)
-        out = binary_activation(logits, tau=self.tau)
+        out = binary_activation_with_min_activation(logits)
         return out

@@ -82,21 +82,23 @@ def get_distances_traps(traps: Graph, reference_distance_d_0: float = 3.0) -> Te
     :return:
     """
     n_qubits = len(traps)
-    reg = Register(traps)
-    dict_distances = reg.distances
-
-    # Vectorize the assignment: get row, col indices and corresponding values
-    # Convert dict keys and values to tensors
-    keys = torch.tensor(list(dict_distances.keys()))
-    vals = torch.tensor(list(dict_distances.values()))
-
-    # Split keys into row and column indices
-    i, j = keys[:, 0], keys[:, 1]
-
-    # Create the square matrix and fill in the values symmetrically
     distances = torch.zeros(n_qubits, n_qubits)
-    distances[i, j] = vals
-    distances[j, i] = vals
+
+    if n_qubits > 1:
+        reg = Register(traps)
+        dict_distances = reg.distances
+
+        # Vectorize the assignment: get row, col indices and corresponding values
+        # Convert dict keys and values to tensors
+        keys = torch.tensor(list(dict_distances.keys()))
+        vals = torch.tensor(list(dict_distances.values()))
+
+        # Split keys into row and column indices
+        i, j = keys[:, 0], keys[:, 1]
+
+        # Create the square matrix and fill in the values symmetrically
+        distances[i, j] = vals
+        distances[j, i] = vals
 
     return reference_distance_d_0 * distances
 
@@ -170,7 +172,7 @@ def precompute_string_kernel(binary_representation: torch.Tensor) -> torch.Tenso
     """
     # Compute pairwise Hamming distances (since all bitstrings have equal length, Levenshtein = Hamming)
     # Here we use broadcasting: difference is 1 if bits differ.
-    diff = (binary_representation.unsqueeze(0) != binary_representation.unsqueeze(1)).float()
+    diff = (binary_representation.unsqueeze(0) != binary_representation.unsqueeze(1))
     hamming_dist = diff.sum(dim=-1)  # shape (K, K)
     kernel_b = torch.exp(-hamming_dist)
     return kernel_b

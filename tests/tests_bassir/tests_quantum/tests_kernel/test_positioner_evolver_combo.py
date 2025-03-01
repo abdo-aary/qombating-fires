@@ -2,7 +2,7 @@ import torch
 from torch import randn
 from bassir.models.quantum.rydberg import RydbergEvolver
 from bassir.models.quantum.positioner import Positioner
-from bassir.models.quantum.qutils import get_default_register_topology
+from bassir.utils.qutils import get_default_register_topology
 import pytest
 
 
@@ -14,7 +14,7 @@ def test_positioner():
     Since x may become non-leaf during forward computations, we call x.retain_grad() explicitly.
     """
     batch_size, dim = 4, 12
-    n_qubits = 2
+    n_qubits = 4
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     x = randn((batch_size, dim)).to(device)
 
@@ -25,6 +25,20 @@ def test_positioner():
 
     assert mask.shape == (batch_size, n_qubits), (f"Shape mismatch, got mask.shape = {mask.shape}, "
                                                   f"should have been {(batch_size, n_qubits)}")
+
+    # Assert that every row has at least one active element.
+    for i in range(10):
+        x = randn((batch_size, dim)).to(device)
+        mask1, mask2 = positioner(x), positioner(x)
+
+        # Assert that two runs of the same input yield the same mask:
+        assert torch.equal(mask1, mask2), "The positioner's output yields are different given the same input."
+
+        # Sum each row: result is a tensor of shape (batch_size,)
+        row_sums = mask1.sum(dim=-1)
+        # Assert that every row has at least one active element.
+        assert torch.all(row_sums >= 1), "Some rows have no active bit."
+
     # For our simple test, define a scalar loss.
     loss = mask.sum()
     loss.backward()

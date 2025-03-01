@@ -1,7 +1,7 @@
 import pytest
 import torch
 from bassir.models.quantum.rydberg import RydbergEvolver
-from bassir.models.quantum.qutils import get_default_register_topology
+from bassir.utils.qutils import get_default_register_topology
 
 
 def test_interaction_operator_nqubits_1():

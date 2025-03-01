@@ -1,7 +1,7 @@
 import math
 import pytest
 
-from bassir.models.quantum.qutils import *
+from bassir.utils.qutils import *
 
 
 def test_binary_representation_order():
@@ -35,12 +35,12 @@ def test_chamfer_kernel_complex():
         [1, 0, 1, 1],
         [0, 0, 1, 1],
         [1, 1, 0, 0]
-    ], dtype=torch.float32)
+    ])
     # Batch 2: 2 samples.
     mask2 = torch.tensor([
         [1, 1, 1, 1],
         [1, 0, 0, 1]
-    ], dtype=torch.float32)
+    ])
 
     # Define a fixed distance matrix for 4 traps.
     # For example, we use:
@@ -53,7 +53,7 @@ def test_chamfer_kernel_complex():
         [1.0, 0.0, 1.0, 2.0],
         [2.0, 1.0, 0.0, 1.0],
         [3.0, 2.0, 1.0, 0.0]
-    ], dtype=torch.float32)
+    ])
 
     # Compute the Chamfer kernel matrix.
     chamfer_mat = chamfer_kernel(mask1, mask2, distances)
@@ -95,7 +95,7 @@ def test_precompute_string_kernel():
     binary_rep = torch.tensor([[0, 0],
                                [1, 0],
                                [0, 1],
-                               [1, 1]], dtype=torch.float32, requires_grad=True)
+                               [1, 1]], dtype=torch.double)
     # Expected: manually computed Hamming distances:
     # 0 vs 0:0, 0 vs 1:1, 0 vs 2:1, 0 vs 3:2,
     # 1 vs 1:0, 1 vs 2:2, 1 vs 3:1,
@@ -104,7 +104,7 @@ def test_precompute_string_kernel():
     expected = torch.tensor([[math.exp(0), math.exp(-1), math.exp(-1), math.exp(-2)],
                              [math.exp(-1), math.exp(0), math.exp(-2), math.exp(-1)],
                              [math.exp(-1), math.exp(-2), math.exp(0), math.exp(-1)],
-                             [math.exp(-2), math.exp(-1), math.exp(-1), math.exp(0)]], dtype=torch.float32)
+                             [math.exp(-2), math.exp(-1), math.exp(-1), math.exp(0)]],)
     kernel_b = precompute_string_kernel(binary_rep)
     assert kernel_b.shape == (4, 4), f"Expected shape (4,4), got {kernel_b.shape}"
     assert torch.allclose(kernel_b, expected, atol=1e-6), f"Kernel matrix incorrect: {kernel_b} vs {expected}"
@@ -114,16 +114,16 @@ def test_compute_intra_mmd_expectation():
     # For N=2 samples and K=4 outcomes.
     n, d = 2, 4
     # Let each sample be uniform, so dist = 1/4 for all outcomes.
-    dist = torch.full((n, d), 0.25, dtype=torch.float32, requires_grad=True)
+    dist = torch.full((n, d), 0.25, requires_grad=True)
     # Use the same binary_rep for 2 qubits.
     binary_rep = torch.tensor([[0, 0],
                                [1, 0],
                                [0, 1],
-                               [1, 1]], dtype=torch.float32)
+                               [1, 1]], dtype=torch.double)
     kernel_b = precompute_string_kernel(binary_rep)
     # For uniform distribution, expectation = (1/16)*sum(kernel_b).
     expected_val = kernel_b.sum() / 16.0
-    expected = torch.full((n,), float(expected_val), dtype=torch.float32)
+    expected = torch.full((n,), float(expected_val))
     intra_expect = compute_intra_mmd_expectation(dist, kernel_b)
     assert intra_expect.shape == (n,), f"Expected shape {(n,)}, got {intra_expect.shape}"
     assert torch.allclose(intra_expect, expected, atol=1e-6), f"Expected {expected}, got {intra_expect}"
@@ -138,16 +138,16 @@ def test_compute_cross_mmd_expectation():
     # Let N=2 and M=3 samples, K=4 outcomes.
     b_n, b_m, d = 2, 3, 4
     # Use uniform distributions for both batches.
-    dist1 = torch.full((b_n, d), 0.25, dtype=torch.float32, requires_grad=True)
-    dist2 = torch.full((b_m, d), 0.25, dtype=torch.float32, requires_grad=True)
+    dist1 = torch.full((b_n, d), 0.25, requires_grad=True)
+    dist2 = torch.full((b_m, d), 0.25, requires_grad=True)
     binary_rep = torch.tensor([[0, 0],
                                [1, 0],
                                [0, 1],
-                               [1, 1]], dtype=torch.float32)
+                               [1, 1]], dtype=torch.double)
     kernel_b = precompute_string_kernel(binary_rep)
     # Expected cross expectation is (1/16)*sum(kernel_b), same for every pair.
     expected_val = kernel_b.sum() / 16.0
-    expected = torch.full((b_n, b_m), float(expected_val), dtype=torch.float32)
+    expected = torch.full((b_n, b_m), float(expected_val))
     cross_expect = compute_cross_mmd_expectation(dist1, dist2, kernel_b)
     assert cross_expect.shape == (b_n, b_m), f"Expected shape {(b_n, b_m)}, got {cross_expect.shape}"
     assert torch.allclose(cross_expect, expected, atol=1e-6), f"Expected {expected}, got {cross_expect}"
@@ -162,19 +162,19 @@ def test_compute_cross_mmd_expectation():
 def test_mmd_kernel():
     # Define small arbitrary inputs.
     # For batch 1: N = 2, for batch 2: M = 3.
-    expect_intra1 = torch.tensor([1.0, 2.0], dtype=torch.float32, requires_grad=True)
-    expect_intra2 = torch.tensor([1.5, 2.5, 3.0], dtype=torch.float32, requires_grad=True)
+    expect_intra1 = torch.tensor([1.0, 2.0], requires_grad=True)
+    expect_intra2 = torch.tensor([1.5, 2.5, 3.0], requires_grad=True)
     # Define a cross expectation and chamfer matrix.
     cross_exp = torch.tensor([[0.5, 0.6, 0.7],
-                              [0.8, 0.9, 1.0]], dtype=torch.float32, requires_grad=True)
-    chamfer_mat = torch.ones((2, 3), dtype=torch.float32, requires_grad=True)
+                              [0.8, 0.9, 1.0]], requires_grad=True)
+    chamfer_mat = torch.ones((2, 3), requires_grad=True)
 
     # Manually compute d2:
     # d2[i,j] = expect_intra1[i] + expect_intra2[j] - 2*(1 * cross_exp[i,j])
     # For i=0: [1+1.5-1.0, 1+2.5-1.2, 1+3.0-1.4] = [1.5, 2.3, 2.6]
     # For i=1: [2+1.5-1.6, 2+2.5-1.8, 2+3.0-2.0] = [1.9, 2.7, 3.0]
     d2_manual = torch.tensor([[1.5, 2.3, 2.6],
-                              [1.9, 2.7, 3.0]], dtype=torch.float32)
+                              [1.9, 2.7, 3.0]])
     expected_kernel = torch.exp(-torch.sqrt(d2_manual))
 
     kernel_mat = mmd_kernel(expect_intra1, expect_intra2, cross_exp, chamfer_mat)

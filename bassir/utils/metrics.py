@@ -1,6 +1,6 @@
 import numpy as np
 from typing import List, Tuple
-import torch as tr
+import torch
 
 
 # --- Levenshtein Distance for String Kernel ---
@@ -31,35 +31,40 @@ def chamfer_distance(arrangements1: List[Tuple[float, float]], arrangements2: Li
 
     d1 = sum(nearest_neighbor_dist(r, arrangements2) for r in arrangements1) / (len(arrangements1) or 1)
     d2 = sum(nearest_neighbor_dist(arrangements2, arrangements1) for arrangements2 in arrangements2) / (
-                len(arrangements2) or 1)
+            len(arrangements2) or 1)
     return (d1 + d2) / 2
 
 
-def binary_activation(logits: tr.Tensor, tau: float = 1.0, threshold: float = 0.5) -> tr.Tensor:
+def binary_activation_with_min_activation(logits: torch.Tensor, threshold: float = 0.5) -> torch.Tensor:
     """
-    Applies a relaxed binary (Bernoulli) activation on logits using a relaxed Bernoulli (Binary Concrete)
-    distribution, thresholds the values, and ensures that at least one entry is 1.
+    Applies a deterministic hard threshold to logits to produce a binary mask,
+    ensuring that at least one element is active in each row.
+    In the forward pass, the output is hard (0 or 1), but the backward pass uses
+    the gradient of a sigmoid (via a straight-through estimator).
 
-    :param logits: The input logits tensor.
-    :param tau: Temperature for the relaxed Bernoulli distribution.
-    :param threshold: Threshold value to convert relaxed values into hard binary outputs.
-    :return: A tensor of the same shape as logits with binary values (0s and 1s) that is differentiable.
+    Args:
+        logits: Input logits tensor.
+        threshold: Threshold value for hard binarization.
+
+    Returns:
+        A tensor of the same shape as logits with binary values, with at least one 1 per row.
     """
-    # Define the relaxed Bernoulli distribution and sample using the reparameterization trick.
-    dist = tr.distributions.RelaxedBernoulli(temperature=tau, logits=logits)
-    y = dist.rsample()
+    # Compute soft activations using the sigmoid.
+    soft = torch.sigmoid(logits)
 
     # Hard threshold to obtain binary outputs.
-    y_hard = (y > threshold).float()
+    hard = (soft >= threshold).float()
 
-    # Check if all entries in the sample are zero.
-    all_zero = (y_hard.sum(dim=-1, keepdim=True) == 0)
-    if all_zero.any():
-        # Force at least one active element by setting the index with the maximum logit to 1.
-        max_indices = tr.argmax(logits, dim=-1)
-        one_hot = tr.nn.functional.one_hot(max_indices, num_classes=logits.size(-1)).float()
-        y_hard = y_hard + all_zero.float() * one_hot
-        y_hard = (y_hard > threshold).float()
+    # Check for rows that are entirely zero.
+    row_sum = hard.sum(dim=-1, keepdim=True)
+    condition = row_sum == 0.0  # Boolean tensor: True for rows with all zeros.
 
-    # Use the straight-through estimator: use hard values for forward pass while keeping gradients from y.
-    return (y_hard - y).detach() + y
+    # For rows that are all zeros, set the entry corresponding to the maximum soft value to 1.
+    if condition.any():
+        max_indices = torch.argmax(soft, dim=-1)  # shape: (batch_size,)
+        one_hot = torch.nn.functional.one_hot(max_indices, num_classes=logits.size(-1)).float()
+        # Replace rows where condition is True with the one_hot vector.
+        hard = torch.where(condition, one_hot, hard)
+
+    # Use the straight-through estimator: forward pass uses hard values, backward pass uses gradients from soft.
+    return hard + (soft - soft.detach())

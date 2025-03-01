@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch import Tensor, vmap
 from networkx import Graph, adjacency_matrix
 from math import pi
-from bassir.models.quantum.qutils import get_binary_representation
+from bassir.utils.qutils import get_binary_representation
 
 # Precompute einsum strings for n in {1,...,10}
 EINSUM_STRINGS = {
@@ -76,7 +76,7 @@ class RydbergEvolver(nn.Module):
                               torch.zeros(2 ** self.n_qubits, dtype=torch.cdouble, device=self.n_operator.device))
         self.initial_state[0] = 1.0
 
-        # Define the varyer submodule.
+        # Define the varyer submodule: x \mapsto V_{\theta_2}(x).
         self.varyer = (nn.Sequential(
             nn.Linear(dim, (4 + dim) // 2),
             nn.ReLU(),
