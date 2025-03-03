@@ -1,8 +1,7 @@
-import torch
 from torch import randn
 from bassir.models.quantum.rydberg import RydbergEvolver
 from bassir.models.quantum.positioner import Positioner
-from bassir.utils.qutils import get_default_register_topology
+from bassir.utils.qutils import *
 import pytest
 
 
@@ -13,8 +12,8 @@ def test_positioner():
     We check that when we compute the loss from the outputted mask, gradients propagate back to x.
     Since x may become non-leaf during forward computations, we call x.retain_grad() explicitly.
     """
-    batch_size, dim = 4, 12
-    n_qubits = 4
+    batch_size, dim = 4, 4
+    n_qubits = 2
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     x = randn((batch_size, dim)).to(device)
 
@@ -45,12 +44,14 @@ def test_positioner():
 
     # Check that positioner's gradients.
     n_zeros = 0
+    n_params = 0
     for param in positioner.parameters():
-        assert param.grad is not None, f"Some of the positioner's gradients are None."
-        if torch.any(0 != param.grad):
+        n_params += 1
+        assert not torch.isnan(param.grad).any(), f"Some of the positioner's gradients are None."
+        if torch.all(0 == param.grad):
             n_zeros += 1
 
-    assert n_zeros != 0, f"Positioner's gradients are always zero."
+    assert n_zeros != n_params, f"Positioner's gradients are always zero."
 
 
 def test_positioner_evolver_combo():
@@ -81,19 +82,23 @@ def test_positioner_evolver_combo():
     loss.backward()
 
     # Check that positioner's gradients are computed.
+    n_params = 0
     n_zeros = 0
     for param in positioner.parameters():
-        assert param.grad is not None, f"Some of the positioner's gradients are None."
-        if torch.any(0 != param.grad):
+        n_params += 1
+        assert not torch.isnan(param.grad).any(), f"Some of the positioner's gradients are None."
+        if torch.all(0 == param.grad):
             n_zeros += 1
-    assert n_zeros != 0, f"Positioner's gradients are always zero."
+    assert n_zeros != n_params, f"Positioner's gradients are always zero."
 
+    n_params = 0
     n_zeros = 0
     for param in evolver.parameters():
-        assert param.grad is not None, f"Some of the evolver's gradients are None."
-        if torch.any(0 != param.grad):
+        n_params += 1
+        assert not torch.isnan(param.grad).any(), f"Some of the evolver's gradients are None."
+        if torch.all(0 == param.grad):
             n_zeros += 1
-    assert n_zeros != 0, f"Evolver's gradients are always zero."
+    assert n_zeros != n_params, f"Evolver's gradients are always zero."
 
 
 def test_combo_shape_and_normalization():

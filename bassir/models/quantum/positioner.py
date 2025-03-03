@@ -1,6 +1,6 @@
 # %%
 from torch import nn, Tensor
-from bassir.utils.metrics import binary_activation_with_min_activation  #binary_activation
+from bassir.utils.qutils import binary_activation_with_min_activation
 from networkx import Graph
 
 

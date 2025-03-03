@@ -57,7 +57,6 @@ class BassirKernel(Kernel):
         Returns:
             Kernel matrix of shape (..., N, M)
         """
-        # Compute masks for each input.
         mask1 = self.positioner(x1)  # shape (..., N, n_qubits)
         mask2 = self.positioner(x2)  # shape (..., M, n_qubits)
 
@@ -67,6 +66,7 @@ class BassirKernel(Kernel):
         # Evolve the quantum state to obtain global probability distributions.
         psi_out1 = self.evolver(x1, mask1)  # shape (..., N, 2^(n_qubits))
         psi_out2 = self.evolver(x2, mask2)  # shape (..., M, 2^(n_qubits))
+
         global_probs1 = psi_out1.abs() ** 2  # shape (..., N, 2^(n_qubits))
         global_probs2 = psi_out2.abs() ** 2  # shape (..., M, 2^(n_qubits))
 
@@ -75,8 +75,6 @@ class BassirKernel(Kernel):
         # Here, self.string_kernel_mat is the precomputed Gram matrix K_B of shape (2^(n_qubits), 2^(n_qubits)).
         # We assume that the batch dimensions are the same (or can be merged) for simplicity.
         # For example, if x1 and x2 are 2D (i.e. shape (N, dim) and (M, dim)), then:
-        global_probs1 = global_probs1.squeeze(0)  # shape (N, 2^(n_qubits))
-        global_probs2 = global_probs2.squeeze(0)  # shape (M, 2^(n_qubits))
 
         expect_intra1 = compute_intra_mmd_expectation(global_probs1, string_kernel_mat)  # shape (N,)
         expect_intra2 = compute_intra_mmd_expectation(global_probs2, string_kernel_mat)  # shape (M,)
@@ -86,4 +84,5 @@ class BassirKernel(Kernel):
 
         # Compute the squared MMD distance:
         kernel_mat = mmd_kernel(expect_intra1, expect_intra2, cross_exp, chamfer_gram_mat)
+
         return kernel_mat

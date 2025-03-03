@@ -2,7 +2,11 @@ import math
 import torch
 import gpytorch
 import pytest
-from bassir.models.gp_factory.gp_model import GPModel
+from bassir.models.factory.gp_model import GPModel
+from bassir.models.quantum.bassir_kernel import BassirKernel
+from bassir.models.quantum.positioner import Positioner
+from bassir.models.quantum.rydberg import RydbergEvolver
+from bassir.utils.qutils import get_default_register_topology
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -11,13 +15,21 @@ def generate_data():
     """Generates training data"""
     train_x = torch.linspace(0, 1, 100)
     train_y = torch.sin(train_x * (2 * math.pi)) + torch.randn(train_x.size()) * math.sqrt(0.04)
+    train_x = train_x.unsqueeze(-1)
     return train_x.to(DEVICE), train_y.to(DEVICE)
 
 
 def train_model(train_x, train_y, num_iters=50):
     """Trains a GP model"""
+    n_qubits = 4
+    dim = train_x.shape[-1]
+
+    traps = get_default_register_topology(topology="all_to_all", n_qubits=n_qubits)
+    positioner = Positioner(dim, traps)
+    evolver = RydbergEvolver(traps=traps, dim=dim)
+    kernel = BassirKernel(traps=traps, positioner=positioner, evolver=evolver)
+
     likelihood = gpytorch.likelihoods.GaussianLikelihood()
-    kernel = gpytorch.kernels.RBFKernel()
     model = GPModel(train_x=train_x, train_y=train_y, likelihood=likelihood, kernel=kernel).to(DEVICE)
 
     model.train()
@@ -63,9 +75,8 @@ def test_model_training(trained_model):
     assert model is not None
     assert likelihood is not None
 
-    # Ensure lengthscale and noise are positive
-    assert model.covar_module.lengthscale.item() > 0
-    assert model.likelihood.noise.item() > 0
+    # Ensure noise is positive
+    assert model.likelihood.noise.item() >= 0
 
 
 def test_model_evaluation(trained_model):

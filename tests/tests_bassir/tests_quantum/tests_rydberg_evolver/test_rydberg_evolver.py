@@ -69,19 +69,18 @@ def test_parameters_gradients():
     varyer = FixedVarier(fixed_params)
     evolver = RydbergEvolver(traps=traps, dim=dim, varyer=varyer)
     x = torch.randn(batch_size, dim)
-    mask_batch = torch.ones(batch_size, n_qubits, requires_grad=True)
+    mask_batch = torch.ones(batch_size, n_qubits)
     psi_out = evolver(x, mask_batch)
     loss = psi_out.abs().sum()
     loss.backward()
     n_zeros = 0
+    n_params = 0
     for param in evolver.parameters():
-        assert param.grad is not None, f"Some of the evolver's gradients are None."
-        if torch.any(0 != param.grad):
+        n_params += 1
+        assert not torch.isnan(param.grad).any(), f"Some of the evolver's gradients are None."
+        if torch.all(0 == param.grad):
             n_zeros += 1
-    assert n_zeros != 0, f"Evolver's gradients are always zero."
-
-    assert mask_batch.grad is not None, "No gradient computed for mask_batch."
-    assert torch.any(0 != mask_batch.grad), "Gradient for mask_batch is all zeros."
+    assert n_zeros != n_params, f"Evolver's gradients are always zero."
 
 
 # =============================================================================

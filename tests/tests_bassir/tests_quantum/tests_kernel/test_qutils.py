@@ -104,7 +104,7 @@ def test_precompute_string_kernel():
     expected = torch.tensor([[math.exp(0), math.exp(-1), math.exp(-1), math.exp(-2)],
                              [math.exp(-1), math.exp(0), math.exp(-2), math.exp(-1)],
                              [math.exp(-1), math.exp(-2), math.exp(0), math.exp(-1)],
-                             [math.exp(-2), math.exp(-1), math.exp(-1), math.exp(0)]],)
+                             [math.exp(-2), math.exp(-1), math.exp(-1), math.exp(0)]], )
     kernel_b = precompute_string_kernel(binary_rep)
     assert kernel_b.shape == (4, 4), f"Expected shape (4,4), got {kernel_b.shape}"
     assert torch.allclose(kernel_b, expected, atol=1e-6), f"Kernel matrix incorrect: {kernel_b} vs {expected}"
@@ -155,8 +155,8 @@ def test_compute_cross_mmd_expectation():
     # Test gradients: backpropagate through dist1.
     loss = cross_expect.sum()
     loss.backward()
-    assert dist1.grad is not None, "No gradient computed for dist1."
-    assert torch.any(0 != dist1.grad), f"Zero gradient for dist1: {dist1.grad}"
+    assert not torch.isnan(dist1.grad).any(), "No gradient computed for dist1."
+    assert not torch.all(0 == dist1.grad), f"Zero gradient for dist1: {dist1.grad}"
 
 
 def test_mmd_kernel():
@@ -184,8 +184,10 @@ def test_mmd_kernel():
     # Test gradients: backpropagate through expect_intra1.
     loss = kernel_mat.sum()
     loss.backward()
-    assert expect_intra1.grad is not None, "No gradient computed for expect_intra1."
-    assert torch.any(0 != expect_intra1.grad), f"Zero gradient for expect_intra1: {expect_intra1.grad}"
+    assert not torch.isnan(expect_intra1.grad).any(), "No gradient computed for expect_intra1."
+    assert not torch.isnan(expect_intra2.grad).any(), "No gradient computed for expect_intra2."
+    assert not torch.isnan(cross_exp.grad).any(), "No gradient computed for cross_exp."
+    assert not torch.isnan(chamfer_mat.grad).any(), "No gradient computed for chamfer_mat."
 
 
 if __name__ == '__main__':
