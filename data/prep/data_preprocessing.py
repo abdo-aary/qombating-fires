@@ -1,7 +1,5 @@
-import pandas as pd
 import cfgrib
 import os
-import sys
 from data.utils.data_management import *
 current_dir = os.path.dirname(os.path.abspath(__file__))
 dfweather_path = os.path.join(current_dir, '..', '..', 'storage', 'dataset','weather.grib')

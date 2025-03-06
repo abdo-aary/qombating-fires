@@ -9,8 +9,6 @@ ocean_gdf = gpd.read_file(url)
 def is_point_in_ocean(point, ocean_gdf):
     return ocean_gdf.contains(point).any()
 
-    return results
-
 
 def is_cell_in_ocean(lat, lon, ocean_gdf, delta=0.125):
     """

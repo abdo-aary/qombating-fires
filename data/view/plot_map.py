@@ -1,6 +1,5 @@
-import geopandas as gpd
 import matplotlib.pyplot as plt
-import pandas as pd
+
 
 def plot_qc_map(quebec):
     if quebec.empty:
