@@ -77,7 +77,7 @@ def test_kernel_symmetry_psdness():
         traps = get_default_register_topology(topology="all_to_all", n_qubits=n_qubits)
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        positioner = Positioner(dim, traps).to(device)
+        positioner = Positioner(traps, dim=dim).to(device)
         evolver = RydbergEvolver(traps=traps, dim=dim).to(device)
         kernel = BassirKernel(traps=traps, positioner=positioner, evolver=evolver)
 
@@ -114,26 +114,27 @@ def test_bassir_kernel_gradients():
     traps = get_default_register_topology(topology="all_to_all", n_qubits=n_qubits)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    positioner = Positioner(dim, traps).to(device)
+    positioner = Positioner(traps, dim=dim).to(device)
     evolver = RydbergEvolver(traps=traps, dim=dim).to(device)
     kernel = BassirKernel(traps=traps, positioner=positioner, evolver=evolver)
 
     # Forward pass: compute mask and then psi.
-    batch_size_1, batch_size_2 = 3, 4
-    x1 = torch.randn((batch_size_1, dim)).to(device)
-    x2 = torch.randn((batch_size_2, dim)).to(device)
+    batch_size = 16
+    x = torch.randn((batch_size, dim)).to(device)
 
-    kernel_mat = kernel(x1, x2).to_dense()
+    # kernel_mat = kernel(x1, x2).to_dense()
+    kernel_mat = kernel(x).to_dense()
     loss = kernel_mat.sum()
     loss.backward()
 
     # Check that all kernel parameters (positioner's and evolver's) gradients are computed.
-    n_zeros = 0
+    n_params, n_zeros = 0, 0
     for param in kernel.parameters():
-        assert param.grad is not None, f"Some of the positioner's gradients are None."
-        if torch.any(0 != param.grad):
+        n_params += 1
+        assert not torch.isnan(param.grad).any(), f"Some of the kernel's gradients are None."
+        if torch.all(0 == param.grad):
             n_zeros += 1
-    assert n_zeros != 0, f"Positioner's gradients are always zero."
+    assert n_zeros != n_params, f"Kernel's gradients are always zero."
 
 
 if __name__ == '__main__':

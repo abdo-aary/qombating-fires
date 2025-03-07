@@ -1,6 +1,7 @@
 from typing import Any, List, Tuple
 
 import numpy as np
+from omegaconf import DictConfig
 from qadence import RydbergDevice, IdealDevice, Register
 from networkx import Graph
 from torch import Tensor
@@ -11,48 +12,71 @@ def get_default_register_topology(topology: str, **kwargs: Any) -> Graph:
     """
     Instantiates a register topology using an ideal Rydberg Device
 
-    :param topology: chosen topology
+    :param topology: the desired topology
     :param kwargs: arguments of necessary arguments to pass to subsequent loaders
     :return: a Register
     """
-    # TODO: check if I need to allow for a device parameterization!
     rb_device: RydbergDevice = IdealDevice()
-
     if topology == 'triangular_lattice':
         reg = Register.triangular_lattice(device_specs=rb_device, **kwargs)
-        return reg.graph
-    elif topology == 'rectangular_lattice':
-        reg = Register.rectangular_lattice(device_specs=rb_device, **kwargs)
-        return reg.graph
+    elif topology == 'honeycomb_lattice':
+        reg = Register.honeycomb_lattice(device_specs=rb_device, **kwargs)
+    elif topology == 'square':
+        reg = Register.square(device_specs=rb_device, **kwargs)
     elif topology == 'line':
         reg = Register.line(device_specs=rb_device, **kwargs)
-        return reg.graph
+    elif topology == 'circle':
+        reg = Register.circle(device_specs=rb_device, **kwargs)
     elif topology == 'all_to_all':
-        reg = Register.line(device_specs=rb_device, **kwargs)
-        return reg.graph
+        reg = Register.all_to_all(device_specs=rb_device, **kwargs)
     else:
         raise Exception(f"Unknown topology: {topology}")
+    return reg.graph
 
 
-def get_registers_from_sub_nodes(sub_nodes: Tensor, traps: Graph) -> Register:
+def get_topology(cfg: DictConfig) -> Graph:
     """
-    Instantiates a Register object from a subset of nodes and their edges in the given traps graph.
-    A register is the quantum system that will undergo evolution.
+    Initializes a topology using Qadence.Register
 
-    :param sub_nodes: List of node indices to include in the subgraph.
-    :param traps: The global graph representing possible traps.
-    :return: A Register object representing the subgraph.
+    :param cfg: the configuration of the topology
+    :return: the graph of the topology
     """
-    # Ensure all nodes in the list are present in the traps graph
-    for node in sub_nodes:
-        if node not in traps.nodes:
-            raise ValueError(f"Node {node} is not in the traps graph")
+    if cfg.type == 'default':
+        topology = cfg.name
+        if topology == ['triangular_lattice', 'honeycomb_lattice']:
+            return get_default_register_topology(topology, n_cells_row=int(cfg.n_cells_row),
+                                                 n_cells_col=int(cfg.n_cells_col))
+        elif topology == 'square':
+            return get_default_register_topology(topology, qubits_side=int(cfg.qubits_side))
+        elif topology in ['line', 'circle', 'all_to_all']:
+            return get_default_register_topology(topology, n_qubits=int(cfg.n_qubits))
+        else:
+            raise Exception(f"Unknown topology: {topology}")
+    elif cfg.type == 'custom':
+        raise NotImplementedError(f"Custom topologies aren't yet handled")
 
-    # Create the subgraph induced by the given nodes
-    subgraph = traps.subgraph(sub_nodes)
+    raise Exception(f"Unknown topology type: {cfg.type}")
 
-    # Instantiate and return the Register object
-    return Register(support=subgraph)
+
+# def get_registers_from_sub_nodes(sub_nodes: Tensor, traps: Graph) -> Register:
+#     """
+#     Instantiates a Register object from a subset of nodes and their edges in the given traps graph.
+#     A register is the quantum system that will undergo evolution.
+#
+#     :param sub_nodes: List of node indices to include in the subgraph.
+#     :param traps: The global graph representing possible traps.
+#     :return: A Register object representing the subgraph.
+#     """
+#     # Ensure all nodes in the list are present in the traps graph
+#     for node in sub_nodes:
+#         if node not in traps.nodes:
+#             raise ValueError(f"Node {node} is not in the traps graph")
+#
+#     # Create the subgraph induced by the given nodes
+#     subgraph = traps.subgraph(sub_nodes)
+#
+#     # Instantiate and return the Register object
+#     return Register(support=subgraph)
 
 
 def get_binary_representation(num_qubits: int) -> Tensor:
@@ -137,8 +161,8 @@ def chamfer_kernel(mask1: Tensor, mask2: Tensor, distances: Tensor) -> Tensor:
     condition = mask1_exp.bool() & mask2_exp.bool()
     active_distances = torch.where(condition, dist_exp, large_const * torch.ones_like(dist_exp, device=device))
 
-    # For each (i, j) and for each active index k in mask1, compute the minimum distance to an active index in mask2.
-    # min_over_mask2 has shape (N, M, n).
+    # For each (i, j) and for each active index k in mask1, compute the minimum distance to an active index in
+    # mask2. min_over_mask2 has shape (N, M, n).
     min_over_mask2, _ = active_distances.min(dim=-1)
 
     # For each sample i in mask1, count the number of active traps.
@@ -234,7 +258,7 @@ def mmd_kernel(expect_intra1: torch.Tensor, expect_intra2: torch.Tensor,
     """
     d2 = expect_intra1.unsqueeze(1) + expect_intra2.unsqueeze(0) - 2 * (chamfer_mat * cross_exp)
 
-    return torch.exp(-torch.sqrt(d2 + 1e-10))    # Add small terms for numerical stability
+    return torch.exp(-torch.sqrt(d2 + 1e-10))  # Add small terms for numerical stability
 
 
 # --- Levenshtein Distance for String Kernel ---
@@ -302,4 +326,3 @@ def binary_activation_with_min_activation(logits: torch.Tensor, threshold: float
 
     # Use the straight-through estimator: forward pass uses hard values, backward pass uses gradients from soft.
     return hard + (soft - soft.detach())
-

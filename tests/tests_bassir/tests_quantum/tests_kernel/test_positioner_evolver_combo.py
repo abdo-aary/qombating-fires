@@ -19,7 +19,7 @@ def test_positioner():
 
     traps = get_default_register_topology(topology="all_to_all", n_qubits=n_qubits)
     # Instantiate Positioner
-    positioner = Positioner(dim, traps).to(device)
+    positioner = Positioner(traps, dim=dim).to(device)
     mask = positioner(x)
 
     assert mask.shape == (batch_size, n_qubits), (f"Shape mismatch, got mask.shape = {mask.shape}, "
@@ -72,7 +72,7 @@ def test_positioner_evolver_combo():
     traps = get_default_register_topology(topology="all_to_all", n_qubits=n_qubits)
 
     # Instantiate Positioner, RydbergEvolver, and the BassirKernel.
-    positioner = Positioner(dim, traps).to(device)
+    positioner = Positioner(traps, dim=dim).to(device)
     evolver = RydbergEvolver(traps=traps, dim=dim).to(device)
 
     psi_output_batch = evolver(x, positioner(x))
@@ -111,7 +111,7 @@ def test_combo_shape_and_normalization():
     batch_size = 3
     dim = 10
     traps = get_default_register_topology(topology="all_to_all", n_qubits=n_qubits)
-    positioner = Positioner(dim, traps)
+    positioner = Positioner(traps, dim=dim)
     evolver = RydbergEvolver(traps=traps, dim=dim)
 
     x = torch.randn(batch_size, dim)

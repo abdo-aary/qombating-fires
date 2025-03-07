@@ -4,13 +4,26 @@ from torch import Tensor, vmap
 from networkx import Graph, adjacency_matrix
 from math import pi
 from bassir.utils.qutils import get_binary_representation
+import string
 
-# Precompute einsum strings for n in {1,...,10}
-EINSUM_STRINGS = {
-    n: ','.join([f"{chr(97 + k)}{chr(65 + k)}" for k in range(n)]) + '->' +
-       ''.join([chr(97 + k) for k in range(n)] + [chr(65 + k) for k in range(n)])
-    for n in range(1, 11)
-}
+# Create a set of allowed characters with letters and digits.
+allowed_chars = string.ascii_letters + "0123456789"  # 26+26+10 = 62 characters
+
+
+def get_einsum_string(n: int) -> str:
+    # Ensure we have enough unique labels: we need 2*n distinct characters.
+    if 2 * n > len(allowed_chars):
+        raise ValueError(f"n={n} is too high; need at most {len(allowed_chars) // 2} matrices.")
+    # For each matrix, assign a pair of indices: one from the first half and one from the second half.
+    # This gives a string like: "aB,cD,..." (if n=2, for example)
+    input_subscripts = [f"{allowed_chars[k]}{allowed_chars[n + k]}" for k in range(n)]
+    # The output will be the concatenation of the first n characters and then the next n characters.
+    output_subscript = "".join(allowed_chars[:n] + allowed_chars[n:2 * n])
+    return ",".join(input_subscripts) + "->" + output_subscript
+
+
+# Precompute einsum strings for n in {1,...,30}
+EINSUM_STRINGS = {n: get_einsum_string(n) for n in range(1, 31)}
 
 
 def n_operator() -> Tensor:
@@ -37,7 +50,7 @@ def kron_product(matrices: Tensor) -> Tensor:
 
 class RydbergEvolver(nn.Module):
     def __init__(self, traps: Graph,
-                 dim: int,
+                 dim: int = None,
                  c_6_ceoff: float = 866,
                  reference_distance_d_0: float = 3.0,
                  initial_state: Tensor = None,
@@ -46,7 +59,7 @@ class RydbergEvolver(nn.Module):
         Implements Rydberg-based time-independent evolution with input-dependent variational parameters.
 
         :param traps: Topology of the total system.
-        :param dim: Input feature dimension.
+        :param dim: Input feature dimension. Needs to be set if no varyer object is provided
         :param c_6_ceoff: C₆ coefficient (e.g. 866).
         :param reference_distance_d_0: Reference distance (e.g., 3 μm).
         :param initial_state: Initial state; default is the zero state.

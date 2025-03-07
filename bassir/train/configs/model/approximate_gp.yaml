@@ -1,0 +1,9 @@
+name: approximate_gp
+
+inducing_pts:
+  num:
+  random_state: 1010
+  kmeans_batch_size:
+
+defaults:
+  - kernel: rbf  # This will look for model/kernel/rbf.yaml
