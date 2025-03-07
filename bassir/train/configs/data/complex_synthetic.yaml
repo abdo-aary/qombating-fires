@@ -1,0 +1,8 @@
+name: complex_synthetic
+data_specs:
+  n_samples: 10000
+  dim: 12
+  noise_std: 0.1
+
+defaults:
+  - loader: default_loader      # this will look for data/loader/default_loader.yaml
