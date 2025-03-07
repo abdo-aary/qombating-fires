@@ -75,6 +75,7 @@ class PGLikelihood(gpytorch.likelihoods._OneDimensionalLikelihood):
 
     # define the marginal likelihood using Gauss Hermite quadrature
     def marginal(self, function_dist, **kwargs):
-        prob_lambda = lambda function_samples: self.forward(function_samples).probs
-        probs = self.quadrature(prob_lambda, function_dist)
+        def prob_fn(function_samples):
+            return self.forward(function_samples).probs
+        probs = self.quadrature(prob_fn, function_dist)
         return torch.distributions.Bernoulli(probs=probs)

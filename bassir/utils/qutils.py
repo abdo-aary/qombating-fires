@@ -53,30 +53,9 @@ def get_topology(cfg: DictConfig) -> Graph:
         else:
             raise Exception(f"Unknown topology: {topology}")
     elif cfg.type == 'custom':
-        raise NotImplementedError(f"Custom topologies aren't yet handled")
+        raise NotImplementedError("Custom topologies aren't yet handled")
 
     raise Exception(f"Unknown topology type: {cfg.type}")
-
-
-# def get_registers_from_sub_nodes(sub_nodes: Tensor, traps: Graph) -> Register:
-#     """
-#     Instantiates a Register object from a subset of nodes and their edges in the given traps graph.
-#     A register is the quantum system that will undergo evolution.
-#
-#     :param sub_nodes: List of node indices to include in the subgraph.
-#     :param traps: The global graph representing possible traps.
-#     :return: A Register object representing the subgraph.
-#     """
-#     # Ensure all nodes in the list are present in the traps graph
-#     for node in sub_nodes:
-#         if node not in traps.nodes:
-#             raise ValueError(f"Node {node} is not in the traps graph")
-#
-#     # Create the subgraph induced by the given nodes
-#     subgraph = traps.subgraph(sub_nodes)
-#
-#     # Instantiate and return the Register object
-#     return Register(support=subgraph)
 
 
 def get_binary_representation(num_qubits: int) -> Tensor:
@@ -213,7 +192,7 @@ def compute_intra_mmd_expectation(dist: torch.Tensor, kernel_b: torch.Tensor) ->
         kernel_b: Precomputed string kernel Gram matrix of shape (K, K).
 
     Returns:
-        intra_expect: Tensor of shape (N,) where E[i] = \sum_{b,b'} dist[i,b] * dist[i,b'] * KB[b,b'].
+        intra_expect: Tensor of shape (N,) where E[i] = sum_{b,b'} dist[i,b] * dist[i,b'] * KB[b,b'].
     """
     # Use Einstein summation to compute the double sum for each sample.
     intra_expect = torch.einsum("ib,ic,bc->i", dist, dist, kernel_b)
@@ -231,7 +210,7 @@ def compute_cross_mmd_expectation(dist1: torch.Tensor, dist2: torch.Tensor, kern
 
     Returns:
         E_cross: Tensor of shape (N, M) with
-                 E_cross[i,j] = \sum_{b,b'} dist1[i,b] * dist2[j,b'] * kernel_b[b,b'].
+                 E_cross[i,j] = sum_{b,b'} dist1[i,b] * dist2[j,b'] * kernel_b[b,b'].
     """
     cross_expect = torch.einsum("ib,jc,bc->ij", dist1, dist2, kernel_b)
     return cross_expect
@@ -288,8 +267,8 @@ def chamfer_distance(arrangements1: List[Tuple[float, float]], arrangements2: Li
         return min(np.linalg.norm(np.array(point) - np.array(p)) for p in points) if points else 0
 
     d1 = sum(nearest_neighbor_dist(r, arrangements2) for r in arrangements1) / (len(arrangements1) or 1)
-    d2 = sum(nearest_neighbor_dist(arrangements2, arrangements1) for arrangements2 in arrangements2) / (
-            len(arrangements2) or 1)
+    d2 = sum(nearest_neighbor_dist(arrangements2, arrangements1) for
+             arrangements2 in arrangements2) / (len(arrangements2) or 1)
     return (d1 + d2) / 2
 
 

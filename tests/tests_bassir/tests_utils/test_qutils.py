@@ -1,7 +1,8 @@
 import math
 import pytest
-
-from bassir.utils.qutils import *
+import torch
+from bassir.utils.qutils import get_binary_representation, precompute_string_kernel, compute_intra_mmd_expectation, \
+    compute_cross_mmd_expectation, mmd_kernel, chamfer_kernel
 
 
 def test_binary_representation_order():

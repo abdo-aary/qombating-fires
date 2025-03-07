@@ -3,7 +3,6 @@ import torch
 import pytorch_lightning as pl
 from hydra.core.hydra_config import HydraConfig
 from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.loggers import TensorBoardLogger
 import logging
 from bassir.utils.build import get_lightning_model
 import os
@@ -42,7 +41,6 @@ def main(cfg: DictConfig):
 
     # Use Hydra’s run directory as the base save_dir:
     run_dir = hydra_cfg.run.dir
-    # logger = TensorBoardLogger(save_dir=run_dir, name="tb_logs")
 
     checkpoint_callback = ModelCheckpoint(
         dirpath=run_dir,

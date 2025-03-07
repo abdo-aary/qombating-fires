@@ -6,7 +6,7 @@ from networkx import Graph
 class Positioner(nn.Module):
     def __init__(self, traps: Graph, projector: nn.Module = None, dim: int = None):
         """
-        Implements the spatial arrangements generating function x \mapsto R_{\theta_1}(x).
+        Implements the spatial arrangements generating function x mapsto R_{theta_1}(x).
 
         :param dim: Input feature dimension.
         :param traps: Graph representing the available trap locations.
@@ -20,7 +20,7 @@ class Positioner(nn.Module):
             # Prepare the projector submodule
             self.projector = projector
         else:
-            assert dim is not None, f"Argument dim should not be None if no projector is given"
+            assert dim is not None, "Argument dim should not be None if no projector is given"
             self.projector = nn.Sequential(nn.Linear(dim, (n_qubits + dim) // 2),
                                            nn.ReLU(),
                                            nn.Linear((n_qubits + dim) // 2, n_qubits))

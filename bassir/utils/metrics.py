@@ -149,9 +149,7 @@ def mcrps_loss(prediction: MultivariateNormal, target: t.Tensor) -> t.Tensor:
     predicted_std = predicted_std.cpu().detach().numpy()
 
     # Compute CRPS using the formula for Gaussian distributions
-    crps_values = predicted_std * (omega * (2 * norm.cdf(omega) - 1) +
-                                   2 * norm.pdf(omega) -
-                                   1 / np.sqrt(np.pi))
+    crps_values = predicted_std * (omega * (2 * norm.cdf(omega) - 1) + 2 * norm.pdf(omega) - 1 / np.sqrt(np.pi))
 
     # Return the mean CRPS value
     return t.tensor(np.mean(crps_values)).to(device)
@@ -185,11 +183,9 @@ def hellinger_distance(prediction_1: MultivariateNormal, prediction_2: Multivari
     det_cov2 = t.det(cov2).pow(1 / 4)
     det_cov_avg = t.det(covariance_matrix_avg).pow(1 / 2)
 
-    exponent_term = (-1 / 8 * (mu1 - mu2).unsqueeze(-1).mT @ t.inverse(covariance_matrix_avg)
-                     @ (mu1 - mu2).unsqueeze(-1))
+    exp_term = (-1 / 8 * (mu1 - mu2).unsqueeze(-1).mT @ t.inverse(covariance_matrix_avg) @ (mu1 - mu2).unsqueeze(-1))
 
-    squared_distance = (1 - (det_cov1 * det_cov2 / det_cov_avg) *
-                        t.exp(exponent_term))
+    squared_distance = (1 - (det_cov1 * det_cov2 / det_cov_avg) * t.exp(exp_term))
     distance = t.sqrt(squared_distance)  # The square root gives the Hellinger distance
 
     return distance

@@ -131,10 +131,10 @@ def test_bassir_kernel_gradients():
     n_params, n_zeros = 0, 0
     for param in kernel.parameters():
         n_params += 1
-        assert not torch.isnan(param.grad).any(), f"Some of the kernel's gradients are None."
+        assert not torch.isnan(param.grad).any(), "Some of the kernel's gradients are None."
         if torch.all(0 == param.grad):
             n_zeros += 1
-    assert n_zeros != n_params, f"Kernel's gradients are always zero."
+    assert n_zeros != n_params, "Kernel's gradients are always zero."
 
 
 if __name__ == '__main__':

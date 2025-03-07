@@ -1,8 +1,9 @@
 from torch import randn
 from bassir.models.quantum.rydberg import RydbergEvolver
 from bassir.models.quantum.positioner import Positioner
-from bassir.utils.qutils import *
+from bassir.utils.qutils import get_default_register_topology
 import pytest
+import torch
 
 
 def test_positioner():
@@ -33,7 +34,7 @@ def test_positioner():
         # Assert that two runs of the same input yield the same mask:
         assert torch.equal(mask1, mask2), "The positioner's output yields are different given the same input."
 
-        # Sum each row: result is a tensor of shape (batch_size,)
+        # Sum each row: result is a tensor of shape (batch_size)
         row_sums = mask1.sum(dim=-1)
         # Assert that every row has at least one active element.
         assert torch.all(row_sums >= 1), "Some rows have no active bit."
@@ -47,11 +48,11 @@ def test_positioner():
     n_params = 0
     for param in positioner.parameters():
         n_params += 1
-        assert not torch.isnan(param.grad).any(), f"Some of the positioner's gradients are None."
+        assert not torch.isnan(param.grad).any(), "Some of the positioner's gradients are None."
         if torch.all(0 == param.grad):
             n_zeros += 1
 
-    assert n_zeros != n_params, f"Positioner's gradients are always zero."
+    assert n_zeros != n_params, "Positioner's gradients are always zero."
 
 
 def test_positioner_evolver_combo():
@@ -86,19 +87,19 @@ def test_positioner_evolver_combo():
     n_zeros = 0
     for param in positioner.parameters():
         n_params += 1
-        assert not torch.isnan(param.grad).any(), f"Some of the positioner's gradients are None."
+        assert not torch.isnan(param.grad).any(), "Some of the positioner's gradients are None."
         if torch.all(0 == param.grad):
             n_zeros += 1
-    assert n_zeros != n_params, f"Positioner's gradients are always zero."
+    assert n_zeros != n_params, "Positioner's gradients are always zero."
 
     n_params = 0
     n_zeros = 0
     for param in evolver.parameters():
         n_params += 1
-        assert not torch.isnan(param.grad).any(), f"Some of the evolver's gradients are None."
+        assert not torch.isnan(param.grad).any(), "Some of the evolver's gradients are None."
         if torch.all(0 == param.grad):
             n_zeros += 1
-    assert n_zeros != n_params, f"Evolver's gradients are always zero."
+    assert n_zeros != n_params, "Evolver's gradients are always zero."
 
 
 def test_combo_shape_and_normalization():
