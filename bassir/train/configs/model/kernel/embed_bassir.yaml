@@ -1,0 +1,13 @@
+name: embed_bassir
+
+topology:
+    type: 'default'
+    name: 'all_to_all'
+    n_qubits: 4
+
+embedder:
+    type: "simple_embedder"
+    dim_out: "auto"
+
+projector:
+varyer:

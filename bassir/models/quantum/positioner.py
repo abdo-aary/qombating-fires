@@ -10,7 +10,7 @@ class Positioner(nn.Module):
 
         :param dim: Input feature dimension.
         :param traps: Graph representing the available trap locations.
-        :param dim: the input dimension
+        :param projector: the used projector
         """
         super().__init__()
         n_qubits = len(traps)

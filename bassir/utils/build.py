@@ -8,6 +8,7 @@ import torch
 from bassir.models.factory.gp_models import ApproximateGP, PGLikelihood
 from bassir.models.factory.lightning_approx import ApproxLightningGP
 from bassir.models.quantum.bassir_kernel import BassirKernel
+from bassir.models.quantum.embed_bassir_kernel import SimpleEmbedder, EmbedBassirKernel
 from bassir.models.quantum.positioner import Positioner
 from bassir.models.quantum.rydberg import RydbergEvolver
 import math
@@ -30,8 +31,17 @@ def get_lightning_model(cfg: DictConfig, train_loader: DataLoader) -> pl.Lightni
         positioner = Positioner(traps=traps, projector=cfg.kernel.projector, dim=dim)
         evolver = RydbergEvolver(traps=traps, varyer=cfg.kernel.varyer, dim=dim)
         kernel = BassirKernel(traps=traps, positioner=positioner, evolver=evolver)
+    elif cfg.kernel.name == "embed_bassir":
+        traps = get_topology(cfg.kernel.topology)
+        if cfg.kernel.embedder.type == "simple_embedder":
+            # Set the dim_out to half the input dimension if "auto" is chosen.
+            dim_out = dim // 2 if cfg.kernel.embedder.dim_out == "auto" else cfg.kernel.embedder.dim_out
+            embedder = SimpleEmbedder(dim_in=dim, dim_out=dim_out)
+            kernel = EmbedBassirKernel(traps=traps, embedder=embedder)
+        else:
+            raise ValueError("Unknown embedder type. Got {cfg.kernel.embedder.type}")
     else:
-        raise ValueError("Unknown kernel type")
+        raise ValueError("Unknown kernel type. Got {cfg.kernel.name}")
 
     # Initialize the inducing points
     # Set the number of inducing points to sqrt(n_train_samples) if no number is given

@@ -6,4 +6,4 @@ inducing_pts:
   kmeans_batch_size:
 
 defaults:
-  - kernel: rbf  # This will look for model/kernel/rbf.yaml
+  - kernel: embed_bassir  # This will look for model/kernel/rbf.yaml
