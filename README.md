@@ -63,17 +63,50 @@ and pull request process—please refer to our [CONTRIBUTING](docs/guides/CONTRI
 For detailed guidelines on how to build a docker image out of the [Dockerfile](Dockerfile), please refer to our 
 [DOCKER_SETUP](docs/guides/DOCKER_SETUP.md) file.
 
+## Data Download, Preprocessing, and Analysis
 
+All datasets are downloaded or generated in `storage/dataset/wildfires`.
 
+### Downloading Raw Datasets
 
+- **Directly from the source**, in `data/get/original/`:
+  - Execute `get_CDS.py` to get the ERA5 data (without precipitation).
+  - Execute `get_precipitation.py` to get the ERA5 precipitation.
 
+- **From our Google Drive**, in `data/get/repository/`:
+  - Execute `get_wildfire.py` to get the Canadian National Fire Database (CNFDB).
 
+### Downloading Transformed Data
 
+- **From our Google Drive**, in `data/get/repository/`:
+  - Execute `get_data.py` to get all the datasets (in CSV and GRIB) except the final one.
+  - Execute `get_final_data.py` to get the final dataset used for training our model.
 
+---
 
+### After Downloading the Raw Datasets
 
+- **To preprocess the data**, in `data/prep/`:
+  - Execute `data_preprocessing` to generate `dataset_pre_analysis.csv` and `dataset_fire_cleaned`.
+  - *(Alternatively, if you have executed `get_data.py`, you should already have these files.)*
 
+- **To analyze the data**, in `notebooks/`:
+  - The Jupyter notebook `data_analysis.ipynb` explains why and how we analyze the data.
+  - The generated dataset is `wildfire_data.csv`.
 
+- **If you don't want to follow the notebook**, you can:
+  - Run `data_analysis` in `data/prep/`.
+  - Run `get_data.py`, and you should have the required dataset.
+
+---
+
+### Utility Scripts
+
+The following Python scripts contain functions used in preprocessing and analysis:
+
+- `data/utils/data_management.py`
+- `data/view/pixel_label.py`
+- `data/view/plot_map.py`
 
 
 
