@@ -25,8 +25,8 @@ def plot_qc_map(quebec):
         ax.plot([lon] * len([lat for lon, lat in coo]), [lat for lon, lat in coo], color='gray', linestyle='-')
 
 
-    label_lon = [x+0.25 for x in range(-80, -56, 1)]
-    label_lat = [x+0.25 for x in range(45, 65, 1)]
+    label_lon = [x for x in range(-80, -56, 1)]
+    label_lat = [x for x in range(45, 65, 1)]
     ax.set_xticks(label_lon)
     ax.set_yticks(label_lat)
     ax.set_xticklabels(label_lon, fontsize=14)

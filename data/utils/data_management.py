@@ -9,25 +9,25 @@ def vectorized_haversine_formula(latitudes1, longitudes1, latitudes2, longitudes
     return d_haversine
 
 
-# Vectoriser le calcul de l'aire
+
 def vectorized_cell_area(latitudes, longitudes, incr_lat, incr_lon):
-    # Calculer les origines des points et les points adjacents
+    # Calculate the vertex of the cell
     origine_lat = latitudes - incr_lat / 2
     origine_lon = longitudes - incr_lon / 2
     point1_lat = latitudes + incr_lat / 2
     point2_lon = longitudes + incr_lon / 2
 
-    # Calculer les distances (largeur et longueur)
+    # Calculate distance between the vertex and multiply the distance to get the area
     largeur = vectorized_haversine_formula(origine_lat, origine_lon, point1_lat, origine_lon)
     longueur = vectorized_haversine_formula(origine_lat, origine_lon, origine_lat, point2_lon)
     area = largeur * longueur #km2
     return area*100 #HA
 def add_coo_area(dataframe_weather, dataframe_wildfire):
-    # Min des latitudes et longitudes pour référence
+    # Min of latitude and longitude
     lat_min = dataframe_weather["LATITUDE"].min()
     lon_min = dataframe_weather["LONGITUDE"].min()
 
-    # Récupérer les incréments entre les premières lignes
+    # get increment
     first_row = dataframe_weather.iloc[0]
     first_lat = first_row["LATITUDE"]
     first_lon = first_row["LONGITUDE"]
@@ -37,15 +37,15 @@ def add_coo_area(dataframe_weather, dataframe_wildfire):
     incr_lat = abs(second_lat - first_lat)
     incr_lon = abs(second_lon - first_lon)
 
-    # Calculer les coordonnées directement et l'aire pour dataframe_weather de manière vectorisée
+    # calculate coordinate system
     dataframe_weather[["COORDINATES_LAT", "COORDINATES_LON"]] = ((dataframe_weather[["LATITUDE", "LONGITUDE"]] -
                                                                   [lat_min,lon_min]) / [incr_lat, incr_lon]).astype(int)
-    # Calculer l'aire pour dataframe_weather de manière vectorisée
+    # Calculate the area of the cell
     dataframe_weather["AREA_HA"] = vectorized_cell_area(
         dataframe_weather["LATITUDE"], dataframe_weather["LONGITUDE"], incr_lat, incr_lon
     )
 
-    # Calculer les coordonnées pour dataframe_wildfire (latitude et longitude normalisées)
+    # calculate coordinate system
     dataframe_wildfire[["COORDINATES_LAT", "COORDINATES_LON"]] = (round((dataframe_wildfire[["LATITUDE", "LONGITUDE"]]
                                                             - [lat_min,lon_min]) / [incr_lat, incr_lon])).astype(int)
 
@@ -57,21 +57,21 @@ def add_coo_area(dataframe_weather, dataframe_wildfire):
     return dataframe_weather, dataframe_wildfire, incr_lat, incr_lon
 
 def aggregate_fire(dataframe_wildfire):
-    # Regroupement des données
+    # regroup the data
     dataframe_wildfire = dataframe_wildfire.groupby(
         ["REP_DATE", "COORDINATES_LAT", "COORDINATES_LON"], as_index=False
     ).agg({
         **{col: "first" for col in dataframe_wildfire.columns if col not in ["SIZE_HA", "CAUSE", "FID"]},
         "SIZE_HA": "sum",
         "CAUSE": lambda x: x.iloc[0] if x.nunique() == 1 else "U",
-        "FID": "min"  # Prend la plus petite FID du groupe
+        "FID": "min"
     })
     return dataframe_wildfire
 def get_cells_chebyshev_range(x, y, N):
     cells = []
     for dx in range(-N, N + 1):
         for dy in range(-N, N + 1):
-            if max(abs(dx), abs(dy)) == N:  # Distance de Chebyshev exactement égale à N
+            if max(abs(dx), abs(dy)) == N:
                 cells.append((x + dx, y + dy))
     return cells
 def excess_fire_distribution(dataframe_wildfire,incr_lat,incr_lon):
@@ -82,7 +82,7 @@ def excess_fire_distribution(dataframe_wildfire,incr_lat,incr_lon):
         date = row["REP_DATE"]
         same_date_cells = dataframe_wildfire[dataframe_wildfire["REP_DATE"] == date]
         dist = 1
-
+        #repartition of burned area among closest cells if the burned area is greater than the actual area due to fire aggregation
         while row["SIZE_HA"] > row["AREA_HA"]:
             neighbors = get_cells_chebyshev_range(row["COORDINATES_LAT"], row["COORDINATES_LON"], dist)
 
@@ -124,7 +124,7 @@ def excess_fire_distribution(dataframe_wildfire,incr_lat,incr_lon):
                     break
             dist+=1
         dataframe_wildfire.loc[index, :] = row
-        # print(dataframe_wildfire.loc[index, :])
+
     return dataframe_wildfire
 def add_burned_density_isfire(dataframe_wildfire):
     dataframe_wildfire["BURNED_DENSITY"] = dataframe_wildfire["SIZE_HA"]/dataframe_wildfire["AREA_HA"]
@@ -154,11 +154,22 @@ def merge_fire_weather(dataframe_wildfire,dataframe_weather):
     dataframe_weather = dataframe_weather.drop(columns=['VALID_TIME'])
     dataframe_wildfire['DATE'] = pd.to_datetime(dataframe_wildfire['DATE'])
     dataframe_weather['DATE'] = pd.to_datetime(dataframe_weather['DATE'])
-    # Fusionner sur la date et les coordonnées
+    # merge on the date
     df_final = dataframe_weather.merge(dataframe_wildfire, on=['DATE', 'COORDINATES_LAT', 'COORDINATES_LON',"CELL_LAT","CELL_LON","AREA_HA"], how='left')
 
-    # Remplacer les valeurs NaN (pas d'incendie) par 0
+    # Replace Nan by 0
     df_final.fillna({'SIZE_HA': 0, 'BURNED_DENSITY': 0, 'PROTZONE': 'Inconnu', 'ECOZ_NAME' : 'Inconnu',
                      'CAUSE':'N',"FID" : 0,"IS_FIRE":0}, inplace=True)
 
     return df_final
+
+
+def vectorized_cell_width_length(latitudes, longitudes, incr_lat, incr_lon):
+    origine_lat = latitudes - incr_lat / 2
+    origine_lon = longitudes - incr_lon / 2
+    point1_lat = latitudes + incr_lat / 2
+    point2_lon = longitudes + incr_lon / 2
+
+    largeur = round(vectorized_haversine_formula(origine_lat, origine_lon, point1_lat, origine_lon), 3)
+    longueur = round(vectorized_haversine_formula(origine_lat, origine_lon, origine_lat, point2_lon), 3)
+    return np.column_stack((largeur, longueur))

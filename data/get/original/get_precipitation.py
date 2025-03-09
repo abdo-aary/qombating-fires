@@ -2,7 +2,7 @@ import cdsapi
 import sys
 import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
-dataset_path = os.path.join(current_dir,'..', '..', '..', 'storage', 'dataset','weather.grib')
+dataset_path = os.path.join(current_dir,'..', '..', '..', 'storage', 'dataset','precipitation.grib')
 dataset_path = os.path.abspath(dataset_path)
 
 dataset = "reanalysis-era5-single-levels"
@@ -11,20 +11,10 @@ if key == 'your_key' :
     print("You need to replace the variable \'key\' with your API token on the website: https://cds.climate.copernicus.eu")
     sys.exit()
 
-
-
 request = {
     "product_type": ["reanalysis"],
     "variable": [
-        "2m_dewpoint_temperature",
-        "2m_temperature",
-        "soil_temperature_level_1",
-        "10m_u_component_of_wind",
-        "10m_v_component_of_wind",
-        "surface_pressure",
-        "leaf_area_index_high_vegetation",
-        "leaf_area_index_low_vegetation",
-        "high_vegetation_cover"
+        "total_precipitation"
     ],
     "year": [
         "2010", "2011", "2012",
@@ -51,12 +41,20 @@ request = {
         "28", "29", "30",
         "31"
     ],
-    "time": ["12:00"],
+    "time": [
+        "00:00", "01:00", "02:00",
+        "03:00", "04:00", "05:00",
+        "06:00", "07:00", "08:00",
+        "09:00", "10:00", "11:00",
+        "12:00", "13:00", "14:00",
+        "15:00", "16:00", "17:00",
+        "18:00", "19:00", "20:00",
+        "21:00", "22:00", "23:00"
+    ],
     "data_format": "grib",
     "download_format": "unarchived",
     "area": [63, -80, 45, -57]
 }
-
 
 client = cdsapi.Client(url="https://cds.climate.copernicus.eu/api/",key = key)
 client.retrieve(dataset, request,str(dataset_path))
