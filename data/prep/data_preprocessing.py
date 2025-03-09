@@ -4,11 +4,11 @@ import xarray as xr
 from data.utils.data_management import *
 import gc
 current_dir = os.path.dirname(os.path.abspath(__file__))
-dfweather_path = os.path.join(current_dir, '..', '..', 'storage', 'dataset','weather.grib')
-dfwildfire_path = os.path.join(current_dir, '..', '..', 'storage', 'dataset','CANADA_WILDFIRES.csv')
-generate_path = os.path.join(current_dir, '..', '..', 'storage', 'dataset',"dataset_pre_analysis.csv")
-generate_fire_path = os.path.join(current_dir, '..', '..', 'storage', 'dataset',"dataset_fire_cleaned.csv")
-precip_file = os.path.join(current_dir, '..', '..', 'storage', 'dataset',"precipitation.grib")
+dfweather_path = os.path.join(current_dir, '..', '..', 'storage', 'dataset','wildfires','weather.grib')
+dfwildfire_path = os.path.join(current_dir, '..', '..', 'storage', 'dataset','wildfires','CANADA_WILDFIRES.csv')
+generate_path = os.path.join(current_dir, '..', '..', 'storage', 'dataset','wildfires',"dataset_pre_analysis.csv")
+generate_fire_path = os.path.join(current_dir, '..', '..', 'storage', 'dataset','wildfires',"dataset_fire_cleaned.csv")
+precip_file = os.path.join(current_dir, '..', '..', 'storage', 'dataset','wildfires',"precipitation.grib")
 dfweather_path  = os.path.abspath(dfweather_path)
 dfwildfire_path = os.path.abspath(dfwildfire_path)
 

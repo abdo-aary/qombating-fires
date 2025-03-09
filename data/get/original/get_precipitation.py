@@ -2,7 +2,7 @@ import cdsapi
 import sys
 import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
-dataset_path = os.path.join(current_dir,'..', '..', '..', 'storage', 'dataset','precipitation.grib')
+dataset_path = os.path.join(current_dir,'..', '..', '..', 'storage', 'dataset','wildfires','precipitation.grib')
 dataset_path = os.path.abspath(dataset_path)
 
 dataset = "reanalysis-era5-single-levels"

@@ -5,9 +5,9 @@ from data.view.pixel_label import *
 import geopandas as gpd
 
 current_dir  = os.getcwd()
-dataset_path = os.path.join(current_dir, '..','..', 'storage', 'dataset',"dataset_pre_analysis.csv")
+dataset_path = os.path.join(current_dir, '..','..', 'storage', 'dataset','wildfires',"dataset_pre_analysis.csv")
 date = '2019-08-01'
-dataset_analysis_path = os.path.join(current_dir, '..','..', 'storage', 'dataset',"dataset_end_analysis.csv")
+dataset_analysis_path = os.path.join(current_dir, '..','..', 'storage', 'dataset','wildfires',"wildfires_data.csv")
 
 url = "https://naciscdn.org/naturalearth/50m/cultural/ne_50m_admin_1_states_provinces.zip"
 canada = gpd.read_file(url)
