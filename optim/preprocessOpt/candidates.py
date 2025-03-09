@@ -1,5 +1,5 @@
-import preprocessOpt.utilities
-import preprocessOpt.toursGen
+import utilities
+import toursGen
 
 #Generate a pool of N tours candidates valid and invalid
 def candidates_pool(start_cell, df, max_moves, pool_size):
