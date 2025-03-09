@@ -7,6 +7,14 @@ import preprocessOpt.candidates
 import preprocessOpt.utilities
 import modelQuantum
 
+import sys
+import os
+
+# Add the parent directory of the current file to sys.path
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+
 file_path = "./optim/output_measure.csv"
 df = pd.read_csv(file_path)
 
@@ -15,13 +23,13 @@ df = pd.read_csv(file_path)
 budget = 3
 
 #We launch drones from Montréal
-#selected_cell = df[(df["COORDINATES_LAT"] == 1) & (df["COORDINATES_LON"] == 25)].iloc[0]
+selected_cell = df[(df["COORDINATES_LAT"] == 1) & (df["COORDINATES_LON"] == 25)].iloc[0]
 
 #We launch drones from Saguenay#
 #selected_cell = df[(df["COORDINATES_LAT"] == 13) & (df["COORDINATES_LON"] == 33)].iloc[0]
 
 #We launch drones from Gaspée
-selected_cell = df[(df["COORDINATES_LAT"] == 14) & (df["COORDINATES_LON"] == 60)].iloc[0]
+#selected_cell = df[(df["COORDINATES_LAT"] == 14) & (df["COORDINATES_LON"] == 60)].iloc[0]
 
 tours = preprocessOpt.candidates.candidates_generation(selected_cell,df,800//20,1000,800,15)
 graph, isolated_vertex = preprocessOpt.utilities.tours_conflict_graph(tours,2)
@@ -43,13 +51,13 @@ res= [tours[i][0] for i in selected_tours]
 df = pd.concat(res, ignore_index=True)
 
 # Save to CSV
-df.to_csv("resultsCGaspe.csv", index=False)
+df.to_csv("resultsCMtl.csv", index=False)
 
 ###QUANTIQUE###
 
 
-qpu_min_dist = 5.0  # Example minimum distance constraint of the QPU
-qpu_max_dist = 38.0  # Example maximum distance constraint of the QPU
+qpu_min_dist = 5.0  # Example minimum distance constraint of the QPU, tiré de Analog Device
+qpu_max_dist = 38.0  # Example maximum distance constraint of the QPU, tiré de Analog Device
 mis,pos = modelQuantum.solve_mis_with_pulser(G1, qpu_min_dist, qpu_max_dist)
 print("Maximum Independent Set:", mis)
 
@@ -65,4 +73,4 @@ res= [tours[i][0] for i in selected_tours]
 df = pd.concat(res, ignore_index=True)
 
 # Save to CSV
-df.to_csv("resultsQGaspe.csv", index=False)
+df.to_csv("resultsQMtl.csv", index=False)

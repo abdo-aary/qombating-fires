@@ -112,7 +112,7 @@ selected_cell = df[(df["COORDINATES_LAT"] == 1) & (df["COORDINATES_LON"] == 25)]
 tours = candidates.candidates_generation(selected_cell,df,800//20,1000,800,15)
 graph, isolated_vertex = utilities.tours_conflict_graph(tours,(800//20)//10)
 # Construction du graphe des tournées
-"""
+
 G = nx.Graph()
 G.add_edges_from(graph)
 qpu_min_dist = 5.0  # Example minimum distance constraint of the QPU
@@ -132,7 +132,6 @@ df = pd.concat(res, ignore_index=True)
 
 # Save to CSV
 df.to_csv("resultsQ.csv", index=False)
-"""
 
 def plot_graph_with_mis(graph, mis_nodes, positions):
     """
@@ -154,4 +153,4 @@ def plot_graph_with_mis(graph, mis_nodes, positions):
 
 
 # Display the graph with MIS nodes in red
-#plot_graph_with_mis(G, mis, pos)
+plot_graph_with_mis(G, mis, pos)

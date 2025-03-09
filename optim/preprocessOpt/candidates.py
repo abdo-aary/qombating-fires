@@ -1,5 +1,5 @@
-from preprocessOpt import utilities
-from preprocessOpt import toursGen
+import preprocessOpt.utilities
+import preprocessOpt.toursGen
 
 #Generate a pool of N tours candidates valid and invalid
 def candidates_pool(start_cell, df, max_moves, pool_size):
@@ -21,7 +21,7 @@ def candidates_pool(start_cell, df, max_moves, pool_size):
 def small_tour_elimination(pool):
     return [(df, lst) for df, lst in pool if df.shape[0] > 4]
 
-#Check that the tours are not longer than the maximum distance a drone can go
+#Check that the tours are not longer than the maximum distance a drone can go, drop the ones that are longer
 def candidate_length_verification(start_cell,pool, dMax):
     booleans = [utilities.tour_real_distance_checking(start_cell, t[1], t[0], dMax) for t in pool if not t[0].empty and len(t[1]) > 0 ]
     filtered_values =  [t for t,b in zip(pool,booleans) if b ]
@@ -44,9 +44,6 @@ def candidate_selection(pool,num_top_tours):
         # Sort by probability_sum in ascending order
 
     sorted_tours = sorted(result_with_probabilities, key=lambda x: x[2])
-
-    # Compute the number of top tours to select (10% of total, at least 1 tour)
-    #num_top_tours = max(1, int(len(sorted_tours) * top_percentage))
 
     # Select the top 10% highest probability tours
     top_tours = sorted_tours[-num_top_tours:]  # Take from the end
@@ -86,6 +83,7 @@ def filter_tours_by_cell_count(tour_pool_with_counts, cell_diff):
 
     return filtered_tours
 
+#We aplly the filters decribed in the technical report in order to generate a good list of candidates
 def candidates_generation(start_cell,df,max_moves,pool_size,d_max, max_tours_vertices):
     pool = candidates_pool(start_cell,df,max_moves,pool_size)
     pool_length_corrected = candidate_length_verification(start_cell,pool,d_max)

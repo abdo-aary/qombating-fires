@@ -6,7 +6,7 @@ import toursGen
 import utilities
 import candidates
 # Charger le fichier CSV
-file_path = "./optim/preprocessOpt/outputTest.csv"
+file_path = "./optim/preprocessOpt/output_measure.csv"
 df = pd.read_csv(file_path)
 
 # Afficher un aperçu des données
@@ -20,17 +20,18 @@ longitudes = df["CELL_LON"].unique()
 fire_free_cells = df[df["IS_FIRE"] == 0]
 
 # Sélectionner une cellule aléatoire parmi celles avec IS_FIRE == 0
-selected_cell = fire_free_cells.sample(1).iloc[0]
+#selected_cell = fire_free_cells.sample(1).iloc[0]
 
 
-# Generate a tour with max distance K (e.g., 50 km)
+#We launch drones from Montréal
+#selected_cell = df[(df["COORDINATES_LAT"] == 1) & (df["COORDINATES_LON"] == 25)].iloc[0]
+
+#We launch drones from Saguenay#
+selected_cell = df[(df["COORDINATES_LAT"] == 13) & (df["COORDINATES_LON"] == 33)].iloc[0]
+
+# Generate a tour with max distance K (e.g., 50 km) divided by the average size of a cell (20km)
 K = 800//20  # Adjust this as needed
-#tour_path, abstract_tour= toursGen.generate_tour(selected_cell, df, K)
-#print(candidates.candidates_pool(selected_cell,df,K,100))
-#pool = candidates.candidates_pool(selected_cell,df,K,700)
-#poolLen = candidates.candidate_length_verification(selected_cell,pool, 500)
-#poolBig = candidates.small_tour_elimination(poolLen)
-#selection =candidates.candidate_selection(poolBig, 0.1)
+
 genPool = candidates.candidates_generation(selected_cell,df,K,1000,800,15)
 print(genPool)
 print(utilities.tours_conflict_graph(genPool,K//4))
