@@ -12,7 +12,7 @@
 
 
 
-## Project structure
+# Project structure
 ````
 root/
 │
@@ -48,18 +48,18 @@ root/
 └── README.md                   # The top-level README for developers using this project
 ````
 
-## Contributing
+# Contributing
  
 For detailed guidelines on how to contribute—covering our branching strategy, testing requirements, CI pipeline, 
 and pull request process—please refer to our [CONTRIBUTING](docs/guides/CONTRIBUTING.md) file.
 
 
-## Using Docker
+# Using Docker
 
 For detailed guidelines on how to build a docker image out of the [Dockerfile](Dockerfile), please refer to our 
 [DOCKER_SETUP](docs/guides/DOCKER_SETUP.md) file.
 
-## Data Download, Preprocessing, and Analysis
+# Data Download, Preprocessing, and Analysis
 
 All datasets are downloaded or generated in `storage/dataset/wildfires`.
 
@@ -105,7 +105,7 @@ The following Python scripts contain functions used in preprocessing and analysi
 - `data/view/plot_map.py`
 
 
-## Training GP models
+# Training GP models
 To train a single rydberg-based GP model use for example the command that trains per default on synthetic data 
 using bassir kernel:
 `` python bassir/train/main.py``
