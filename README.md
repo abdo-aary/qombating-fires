@@ -89,6 +89,7 @@ up in the configs/experiment/ directory and run
 <!-- Utility commands -->
 <!-- Export python path: ``export PYTHONPATH=${PYTHONPATH}:${pwd}``-->
 <!-- Run jupyter-lab server ``jupyter lab --ip 10.44.83.233 --port 8899 --no-browser`` -->
+<!-- Redirect the ports using ``ssh -L 6006:localhost:6006 user@machine`` -->
 
 <!-- Run the self-hosted runner via:  -->
 

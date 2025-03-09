@@ -1,0 +1,7 @@
+name: wildfires
+specs:
+  window_size: 7
+  bal_factor: 7
+  augmentation_factor: 7
+defaults:
+  - loader: default_loader      # this will look for data/loader/default_loader.yaml

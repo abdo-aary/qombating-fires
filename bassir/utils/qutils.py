@@ -1,12 +1,14 @@
 from typing import Any, List, Tuple
 
 import numpy as np
+import qadence
 from omegaconf import DictConfig
 from qadence import RydbergDevice, IdealDevice, Register
 from networkx import Graph
 from torch import Tensor
 import torch
-
+import matplotlib.pyplot as plt
+import networkx as nx
 
 def get_default_register_topology(topology: str, **kwargs: Any) -> Graph:
     """
@@ -29,6 +31,8 @@ def get_default_register_topology(topology: str, **kwargs: Any) -> Graph:
         reg = Register.circle(device_specs=rb_device, **kwargs)
     elif topology == 'all_to_all':
         reg = Register.all_to_all(device_specs=rb_device, **kwargs)
+    elif topology == 'rectangular_lattice':
+        reg = Register.rectangular_lattice(device_specs=rb_device, **kwargs)
     else:
         raise Exception(f"Unknown topology: {topology}")
     return reg.graph
@@ -43,13 +47,16 @@ def get_topology(cfg: DictConfig) -> Graph:
     """
     if cfg.type == 'default':
         topology = cfg.name
-        if topology == ['triangular_lattice', 'honeycomb_lattice']:
+        if topology in ['triangular_lattice', 'honeycomb_lattice']:
             return get_default_register_topology(topology, n_cells_row=int(cfg.n_cells_row),
                                                  n_cells_col=int(cfg.n_cells_col))
         elif topology == 'square':
             return get_default_register_topology(topology, qubits_side=int(cfg.qubits_side))
         elif topology in ['line', 'circle', 'all_to_all']:
             return get_default_register_topology(topology, n_qubits=int(cfg.n_qubits))
+        elif topology == 'rectangular_lattice':
+            return get_default_register_topology(topology, qubits_row=int(cfg.qubits_row),
+                                                 qubits_col=int(cfg.qubits_col))
         else:
             raise Exception(f"Unknown topology: {topology}")
     elif cfg.type == 'custom':
@@ -305,3 +312,17 @@ def binary_activation_with_min_activation(logits: torch.Tensor, threshold: float
 
     # Use the straight-through estimator: forward pass uses hard values, backward pass uses gradients from soft.
     return hard + (soft - soft.detach())
+
+
+def log_register_topology(register: qadence.Register, logger, global_step: int = 0):
+    # Create a matplotlib figure
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    # Draw the networkx graph on the axes
+    register.draw(show=False)
+
+    # Log the figure to your logger (TensorBoard in this example)
+    logger.experiment.add_figure("Register_topology", fig, global_step=global_step)
+
+    # Close the figure to free memory
+    plt.close(fig)

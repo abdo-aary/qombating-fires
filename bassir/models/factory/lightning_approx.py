@@ -9,8 +9,8 @@ class ApproxLightningGP(pl.LightningModule):
     def __init__(self, gp_model: ApproximateGP,
                  likelihood: PGLikelihood,
                  num_data: int,
-                 lr_var: float = 5e-2,
-                 lr_hyper: float = 5e-4):
+                 lr_var: float = 1e-3,
+                 lr_hyper: float = 1e-4):
         """
         Implements a Lightning rapper over the GP model
 

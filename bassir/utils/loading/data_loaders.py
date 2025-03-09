@@ -4,8 +4,10 @@ from torch.utils.data import DataLoader, TensorDataset
 import torch
 import os
 
+from bassir.prep.temporal_prep import WildfireWindowDataset
 from bassir.utils.build import get_auto_batch_size
 from bassir.utils.loading.utils import generate_complex_synthetic_data
+from bassir.utils.settings import STORAGE_PATH
 
 
 def get_data_loaders(cfg: DictConfig) -> Tuple[DataLoader, DataLoader, DataLoader]:
@@ -27,8 +29,15 @@ def get_data_loaders(cfg: DictConfig) -> Tuple[DataLoader, DataLoader, DataLoade
                                               test_b_size=cfg.loader.specs.test_b_size,
                                               max_b_size=cfg.loader.specs.max_b_size)
 
-    elif cfg.name == "wildfires":
-        raise NotImplementedError(f"Handling the {cfg.name} data is not yet provided.")
+    elif cfg.name in ["wildfires", "toy_wildfires"]:
+        dataset_object_path = os.path.join(STORAGE_PATH, "data", cfg.name, "preprocessed_dataset.pkl")
+        dataset = WildfireWindowDataset.load(dataset_object_path)
+        return dataset.get_dataloaders(augmentation_factor=cfg.specs.augmentation_factor,
+                                       train_b_size=cfg.loader.specs.train_b_size,
+                                       val_b_size=cfg.loader.specs.val_b_size,
+                                       test_b_size=cfg.loader.specs.test_b_size,
+                                       max_b_size=cfg.loader.specs.max_b_size,
+                                       num_workers=cfg.loader.specs.num_workers)
     else:
         raise ValueError("Unknown data {cfg.name}!")
 

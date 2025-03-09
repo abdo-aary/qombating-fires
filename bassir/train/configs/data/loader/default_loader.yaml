@@ -1,7 +1,7 @@
 specs:
   num_workers: "auto"
   train_ratio: 0.7
-  val_ratio: 0.1
+  val_ratio: 0.15
   train_b_size: "auto"
   val_b_size: "auto"
   test_b_size: "auto"

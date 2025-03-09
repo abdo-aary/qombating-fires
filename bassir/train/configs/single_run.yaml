@@ -2,12 +2,12 @@
 
 defaults:
   - _self_
-  - data: complex_synthetic           # This should be set when running the script
+  - data: wildfires                   # This should be set when running the script
   - experiment: default_experiment    # This should be set when running the script
   - model: approximate_gp             # This should be set when running the script
 
 run_specs:
-  seed: 1234
+  seed: 12345
 
 hydra:
 

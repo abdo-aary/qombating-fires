@@ -1,9 +1,15 @@
 name: embed_bassir
 
+#topology:
+#    type: 'default'
+#    name: 'rectangular_lattice'
+#    qubits_row : 2
+#    qubits_col: 3
+
 topology:
     type: 'default'
     name: 'all_to_all'
-    n_qubits: 4
+    n_qubits: 7
 
 embedder:
     type: "simple_embedder"

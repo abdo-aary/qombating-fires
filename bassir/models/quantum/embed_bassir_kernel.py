@@ -72,6 +72,7 @@ class EmbedBassirKernel(Kernel):
         """
         super().__init__(**kwargs)
         n_qubits = len(traps)
+        self.n_qubits = n_qubits
         dim_embed_out = embedder.dim_out
 
         self.traps = traps
