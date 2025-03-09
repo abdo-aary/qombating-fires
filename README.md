@@ -33,10 +33,7 @@ root/
 │   ├── utils/                  # Utility tools used through src code
 │   └── view/                   # Scripts to create exploratory and results oriented visualizations
 │
-├── guru/                       # Source code for the quantum optimizer (responder)
-│   ├── optimizers/             # Scripts that define quantum optimizers
-│   ├── utils/                  # Utility tools used through src code
-│   └── view/                   # Scripts to create exploratory and results oriented visualizations
+├── optim/                      # Source code for the quantum optimizer (responder)
 │
 ├── storage/                    # Experiments' results. Directory generated automatically, with content not handled 
 │                               # by Git 
