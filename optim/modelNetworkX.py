@@ -6,7 +6,7 @@ import preprocessOpt
 import preprocessOpt.candidates
 import preprocessOpt.utilities
 
-file_path = "./optim/preprocessOpt/outputTest.csv"
+file_path = "./optim/output_measure.csv"
 df = pd.read_csv(file_path)
 # Paramètres de la grille
 grid_size = 10  # Taille de la grille
@@ -17,9 +17,12 @@ budget = 5  # Nombre maximum de tournées à sélectionner
 # Filtrer les cellules où IS_FIRE == 0
 fire_free_cells = df[df["IS_FIRE"] == 0]
 # Sélectionner une cellule aléatoire parmi celles avec IS_FIRE == 0
-selected_cell = fire_free_cells.sample(1).iloc[0]
+#selected_cell = fire_free_cells.sample(1).iloc[0]
+
+#We launch drones from Montréal
+selected_cell = df[(df["COORDINATES_LAT"] == 1) & (df["COORDINATES_LON"] == 25)].iloc[0]
 tours = preprocessOpt.candidates.candidates_generation(selected_cell,df,800//20,1000,800,15)
-graph, isolated_vertex = preprocessOpt.utilities.tours_conflict_graph(tours,(800//20)//4)
+graph, isolated_vertex = preprocessOpt.utilities.tours_conflict_graph(tours,2)
 # Construction du graphe des tournées
 
 G = nx.Graph()
