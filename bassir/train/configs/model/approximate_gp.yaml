@@ -1,0 +1,14 @@
+name: approximate_gp
+
+inducing_pts:
+  num:
+  random_state: 1010
+  kmeans_batch_size:
+
+learning:
+  lr_var: 1e-3
+  lr_hyper: 1e-4
+
+defaults:
+  - kernel: embed_bassir  # This will look for model/kernel/embed_bassir.yaml
+#   - kernel: rbf  # This will look for model/kernel/rbf.yaml

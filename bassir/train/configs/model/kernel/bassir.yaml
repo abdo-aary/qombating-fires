@@ -1,0 +1,10 @@
+name: bassir
+
+topology:
+    type: 'default'
+    name: 'all_to_all'
+    n_qubits: 5
+
+projector:
+
+varyer:

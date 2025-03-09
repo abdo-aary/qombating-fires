@@ -1,0 +1,35 @@
+# Main config file for a single run experiment
+
+defaults:
+  - _self_
+  - data: wildfires                   # This should be set when running the script
+  - experiment: default_experiment    # This should be set when running the script
+  - model: approximate_gp             # This should be set when running the script
+
+run_specs:
+  seed: 12345
+
+hydra:
+
+  job:
+    name: approx_gp
+    chdir: True
+
+  run:
+    # This sets the working directory for the run.
+    dir: ${oc.env:EXPERIMENTS_PATH}/${data.name}/${model.name}/${model.kernel.name}/${now:%Y-%m-%d_%H_%M_%S}
+
+  job_logging:
+    version: 1
+    formatters:
+      simple:
+        format: '[%(asctime)s][%(levelname)s] - %(name)s: %(message)s'
+    handlers:
+      file:
+        class: logging.FileHandler
+        filename: log_file.log
+        formatter: simple
+        level: INFO
+    root:
+      level: INFO
+      handlers: [ file ]
