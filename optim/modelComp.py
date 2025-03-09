@@ -15,7 +15,7 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
-file_path = "./optim/output_measure.csv"
+file_path = "storage/output/test_samples_measures.csv"
 df = pd.read_csv(file_path)
 
 

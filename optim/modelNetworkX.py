@@ -6,7 +6,7 @@ import preprocessOpt
 import preprocessOpt.candidates
 import preprocessOpt.utilities
 
-file_path = "./optim/output_measure.csv"
+file_path = "storage/output/test_samples_measures.csv"
 df = pd.read_csv(file_path)
 # Paramètres de la grille
 grid_size = 10  # Taille de la grille

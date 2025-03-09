@@ -1,5 +1,5 @@
-import utilities
-import toursGen
+import preprocessOpt.utilities
+import preprocessOpt.toursGen
 
 #Generate a pool of N tours candidates valid and invalid
 def candidates_pool(start_cell, df, max_moves, pool_size):
@@ -10,7 +10,7 @@ def candidates_pool(start_cell, df, max_moves, pool_size):
     result = []
     
     while len(result) < pool_size:
-        tour_df, tour_moves = toursGen.generate_cell_tour(start_cell, df, max_moves)
+        tour_df, tour_moves = preprocessOpt.toursGen.generate_cell_tour(start_cell, df, max_moves)
         
         if not tour_df.empty:  # Only add valid tours
             result.append((tour_df, tour_moves))
@@ -23,7 +23,7 @@ def small_tour_elimination(pool):
 
 #Check that the tours are not longer than the maximum distance a drone can go, drop the ones that are longer
 def candidate_length_verification(start_cell,pool, dMax):
-    booleans = [utilities.tour_real_distance_checking(start_cell, t[1], t[0], dMax) for t in pool if not t[0].empty and len(t[1]) > 0 ]
+    booleans = [preprocessOpt.utilities.tour_real_distance_checking(start_cell, t[1], t[0], dMax) for t in pool if not t[0].empty and len(t[1]) > 0 ]
     filtered_values =  [t for t,b in zip(pool,booleans) if b ]
 
     return filtered_values

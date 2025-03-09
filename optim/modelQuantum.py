@@ -86,8 +86,8 @@ def solve_mis_with_pulser(graph, qpu_min_dist, qpu_max_dist, max_attempts=100000
 
     return independent_set, positions
 
-# Example usage:
-file_path = "./optim/output_measure.csv"
+
+file_path = "./storage/output/test_samples_measures.csv"
 df = pd.read_csv(file_path)
 # Paramètres de la grille
 grid_size = 10  # Taille de la grille
@@ -96,7 +96,8 @@ budget = 5  # Nombre maximum de tournées à sélectionner
 
 
 # Filtrer les cellules où IS_FIRE == 0
-fire_free_cells = df[df["IS_FIRE"] == 0]
+#Ignition likelihood isIS_Fire
+#fire_free_cells = df[df["IS_FIRE"] == 0]
 # Sélectionner une cellule aléatoire parmi celles avec IS_FIRE == 0
 #selected_cell = fire_free_cells.sample(1).iloc[0]
 

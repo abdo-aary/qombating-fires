@@ -8,7 +8,7 @@ import preprocessOpt.candidates
 import preprocessOpt.utilities
 import modelQuantum
 
-dataset_path = "optim\\output_measure.csv"
+dataset_path = "storage/output/test_samples_measures.csv"
 df = pd.read_csv(dataset_path)
 
 def truncate(df):
