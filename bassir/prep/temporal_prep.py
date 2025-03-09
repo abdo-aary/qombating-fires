@@ -101,7 +101,7 @@ class WildfireWindowDataset:
         # Aggregated test sample attributes
         self.X_agg_test_samples = None  # shape: (n_cells, d_agg)
         self.y_test_samples = None  # shape: (n_cells,)
-        self.test_sample_date = None  # the selected test sample date
+        self.test_sample_dates = None  # the selected test sample date
 
         # Save initial column lists (optional)
         self.cols = None
@@ -242,91 +242,111 @@ class WildfireWindowDataset:
 
     def _prepare_test_samples(self, scaler=None):
         """
-        Prepares aggregated test samples from the full (unbalanced) dataset.
+        Prepares aggregated test samples from the full (unbalanced) dataset for a contiguous week.
+
         Steps:
-          1. Split the full unbalanced data into a test set using a date-based split (to avoid future leakage).
-          2. Among these test samples, identify the test date with the maximum total fire flags (np.sum(y==1)).
-          3. For that date, select one window per unique cell (based on CELL_LAT and CELL_LON).
-          4. Aggregate the selected windows via preprocess_windows() to obtain X_agg_test_samples.
-          5. Save the corresponding labels into y_test_samples and the chosen date in test_sample_date.
-          6. Cache the unique cell metadata for later use (e.g., in produce_test_csv).
-          7. Finally, clear the full-data caches.
+          1. Identify the set of unique test dates from the full data.
+          2. Slide a window of length equal to self.window_size (e.g. 7 days) over these dates,
+             and for each contiguous block (i.e. where the difference between the last and first is exactly window_size - 1 days),
+             compute the total number of fire flags.
+          3. Select the contiguous week (block) with the maximum total fire flags.
+          4. For each day in that week, select one sample per unique cell.
+          5. Aggregate these selected windows using preprocess_windows to obtain:
+                - self.X_agg_test_samples of shape (window_size * n_cells, d_agg)
+                - self.y_test_samples of shape (window_size * n_cells,)
+             Also cache the per-sample dates and cell metadata for later CSV production.
+          6. Clear the full-data caches.
         """
-        # --- Step 1: Identify test dates from the full unbalanced data ---
-        # Use unique dates (assumed sorted) from the full dataset
-        unique_dates = np.unique(self.sample_dates_full)
-        num_dates = len(unique_dates)
-        # Determine number of test dates (at least one)
-        num_test_dates = int(self.test_ratio * num_dates)
-        if num_test_dates == 0:
-            num_test_dates = 1
-        # Choose the last num_test_dates as the test period
-        test_dates = unique_dates[-num_test_dates:]
+        # --- Step 1: Get unique test dates (sorted) from full unbalanced data ---
+        test_dates = np.unique(self.sample_dates_full)
+        test_dates = np.sort(test_dates)  # assuming these are numpy datetime64 or strings in YYYY-MM-DD format
+        # Convert to pandas datetime for easy date arithmetic
+        test_dates_pd = pd.to_datetime(test_dates)
 
-        # Filter full data to only include test dates
-        mask_test = np.isin(self.sample_dates_full, test_dates)
-        X_test_full = self.X_full[mask_test]
-        y_test_full = self.y_full[mask_test]
-        dates_test_full = self.sample_dates_full[mask_test]
-        cell_lat_test_full = self.sample_cell_lats_full[mask_test]
-        cell_lon_test_full = self.sample_cell_lons_full[mask_test]
-        coord_lat_test_full = self.sample_coord_lats_full[mask_test]
-        coord_lon_test_full = self.sample_coord_lons_full[mask_test]
+        block_length = self.window_size  # number of days for the test week
+        n_dates = len(test_dates_pd)
+        best_block = None
+        best_block_sum = -1
 
-        # --- Step 2: Select the test date with the maximum number of fire flags ---
-        unique_test_dates = np.unique(dates_test_full)
-        max_fire = -1
-        best_date = None
-        for d in unique_test_dates:
-            fire_count = np.sum(y_test_full[dates_test_full == d])
-            if fire_count > max_fire:
-                max_fire = fire_count
-                best_date = d
-        self.test_sample_date = best_date
+        # --- Step 2: Slide a window over the test dates ---
+        for i in range(n_dates - block_length + 1):
+            block = test_dates_pd[i:i + block_length]
+            # Check if the block is contiguous: difference between last and first equals block_length - 1 days
+            if (block[-1] - block[0]).days == block_length - 1:
+                mask_block = np.isin(self.sample_dates_full, block)
+                block_sum = np.sum(self.y_full[mask_block])
+                if block_sum > best_block_sum:
+                    best_block_sum = block_sum
+                    best_block = block
 
-        # --- Step 3: For the best date, select one sample per unique cell ---
-        mask_best = dates_test_full == best_date
-        X_best = X_test_full[mask_best]
-        y_best = y_test_full[mask_best]
-        cell_lat_best = cell_lat_test_full[mask_best]
-        cell_lon_best = cell_lon_test_full[mask_best]
-        coord_lat_best = coord_lat_test_full[mask_best]
-        coord_lon_best = coord_lon_test_full[mask_best]
+        if best_block is None:
+            # Fallback: choose the last block_length dates
+            best_block = test_dates_pd[-block_length:]
+        # Convert best_block to an array of strings in YYYY-MM-DD format
+        best_block_str = best_block.strftime("%Y-%m-%d")
 
-        # Build dictionary to keep one sample per unique cell (using (CELL_LAT, CELL_LON) as identifier)
-        unique_cells = {}
-        X_best_selected = []
-        y_best_selected = []
-        unique_cell_lat = []
-        unique_cell_lon = []
-        unique_coord_lat = []
-        unique_coord_lon = []
-        for i, (lat, lon) in enumerate(zip(cell_lat_best, cell_lon_best)):
-            cell_id = (lat, lon)
-            if cell_id not in unique_cells:
-                unique_cells[cell_id] = True
-                X_best_selected.append(X_best[i])
-                y_best_selected.append(y_best[i])
-                unique_cell_lat.append(lat)
-                unique_cell_lon.append(lon)
-                unique_coord_lat.append(coord_lat_best[i])
-                unique_coord_lon.append(coord_lon_best[i])
+        # --- Step 3: For each day in the chosen week, select one window per unique cell ---
+        X_week_list = []
+        y_week_list = []
+        test_sample_dates = []  # store date corresponding to each aggregated sample
+        unique_cell_lat_week = []
+        unique_cell_lon_week = []
+        unique_coord_lat_week = []
+        unique_coord_lon_week = []
 
-        X_best_selected = np.array(X_best_selected)
-        y_best_selected = np.array(y_best_selected)
+        for d in best_block_str:
+            # Convert d to numpy datetime64 if necessary
+            d_val = np.datetime64(d)
+            mask_day = self.sample_dates_full == d_val
+            X_day = self.X_full[mask_day]
+            y_day = self.y_full[mask_day]
+            cell_lat_day = self.sample_cell_lats_full[mask_day]
+            cell_lon_day = self.sample_cell_lons_full[mask_day]
+            coord_lat_day = self.sample_coord_lats_full[mask_day]
+            coord_lon_day = self.sample_coord_lons_full[mask_day]
+
+            unique_cells = {}
+            X_day_selected = []
+            y_day_selected = []
+            cell_lat_sel = []
+            cell_lon_sel = []
+            coord_lat_sel = []
+            coord_lon_sel = []
+            for i, (lat, lon) in enumerate(zip(cell_lat_day, cell_lon_day)):
+                cell_id = (lat, lon)
+                if cell_id not in unique_cells:
+                    unique_cells[cell_id] = True
+                    X_day_selected.append(X_day[i])
+                    y_day_selected.append(y_day[i])
+                    cell_lat_sel.append(lat)
+                    cell_lon_sel.append(lon)
+                    coord_lat_sel.append(coord_lat_day[i])
+                    coord_lon_sel.append(coord_lon_day[i])
+            X_week_list.extend(X_day_selected)
+            y_week_list.extend(y_day_selected)
+            # Extend dates and metadata arrays with one entry per unique cell of that day
+            test_sample_dates.extend([d] * len(X_day_selected))
+            unique_cell_lat_week.extend(cell_lat_sel)
+            unique_cell_lon_week.extend(cell_lon_sel)
+            unique_coord_lat_week.extend(coord_lat_sel)
+            unique_coord_lon_week.extend(coord_lon_sel)
+
+        X_week_selected = np.array(X_week_list)  # shape: (week*n_cells, window_size, n_features)
+        y_week_selected = np.array(y_week_list)  # shape: (week*n_cells,)
 
         # --- Step 4: Aggregate the selected windows ---
-        X_agg_test = preprocess_windows(X_best_selected, scaler=scaler)
-        self.X_agg_test_samples = X_agg_test
-        self.y_test_samples = y_best_selected
+        X_agg_week = preprocess_windows(X_week_selected, scaler=scaler)
+        self.X_agg_test_samples = X_agg_week  # shape: (week*n_cells, d_agg)
+        self.y_test_samples = y_week_selected
 
-        # Cache unique cell metadata for CSV production
-        self._unique_test_cell_lats = unique_cell_lat
-        self._unique_test_cell_lons = unique_cell_lon
-        self._unique_test_coord_lats = unique_coord_lat
-        self._unique_test_coord_lons = unique_coord_lon
+        # Save metadata for CSV production
+        self.test_sample_dates = np.array(test_sample_dates)
+        self._unique_test_cell_lats = unique_cell_lat_week
+        self._unique_test_cell_lons = unique_cell_lon_week
+        self._unique_test_coord_lats = unique_coord_lat_week
+        self._unique_test_coord_lons = unique_coord_lon_week
 
-        # --- Step 5: Free up memory by clearing full-data caches ---
+        # --- Step 5: Clear full-data caches ---
         self.X_full = None
         self.y_full = None
         self.sample_dates_full = None
@@ -337,24 +357,20 @@ class WildfireWindowDataset:
 
     def produce_test_csv(self, probabilities: np.ndarray, out_csv_path: str):
         """
-        Given an array of predicted probabilities for the test set (shape = y_test_samples.shape),
+        Given an array of predicted probabilities for the test set (shape matching self.y_test_samples),
         produce a CSV with columns:
-           [DATE, CELL_LAT, CELL_LON, COORDINATES_LAT, COORDINATES_LON, IGNITION_LIKELIHOOD]
-        using the metadata from the selected test sample date.
-        :param probabilities: np.ndarray of shape (n_cells,)
+           [DATE, CELL_LAT, CELL_LON, COORDINATES_LAT, COORDINATES_LON, IS_FIRE_NEXT_DAY, IGNITION_LIKELIHOOD]
+        using the metadata from the selected week.
+
+        :param probabilities: np.ndarray of shape (window_size * n_cells,)
         :param out_csv_path: Path to save the resulting CSV.
         """
         if len(probabilities) != len(self.y_test_samples):
-            raise ValueError("Length of probabilities must match number of test samples for the selected date.")
+            raise ValueError("Length of probabilities must match number of test samples for the selected window.")
 
-        # To reconstruct metadata for the selected test samples, we must reapply the mask used during
-        # _prepare_test_samples. For simplicity, assume that self.test_sample_date, and the associated cell
-        # coordinates, are stored. (In a more complete implementation you might cache these metadata arrays as
-        # attributes.) Here, we assume that the ordering of self.X_agg_test_samples matches that of the unique cell
-        # identifiers. You might want to store a separate metadata dictionary during _prepare_test_samples. For
-        # demonstration, we rebuild a DataFrame from the test sample selection:
+        # Now, self.test_sample_dates contains the date for each aggregated test sample.
         meta_df = pd.DataFrame({
-            "DATE": [self.test_sample_date] * len(self.y_test_samples),
+            "DATE": self.test_sample_dates,
             "CELL_LAT": self._unique_test_cell_lats,
             "CELL_LON": self._unique_test_cell_lons,
             "COORDINATES_LAT": self._unique_test_coord_lats,
@@ -367,7 +383,6 @@ class WildfireWindowDataset:
         os.makedirs(output_dir, exist_ok=True)
         meta_df.to_csv(out_csv_path, index=False)
         logger.info(f"Predictions CSV saved to {out_csv_path}")
-
         return meta_df
 
     def get_data(self, phase: str):

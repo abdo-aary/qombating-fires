@@ -2,7 +2,7 @@ name: default_experiment
 
 train_specs:
   log_every_n_steps:
-  max_epochs: 500
+  max_epochs: 100
   accelerator: "gpu"
   devices: 2
   precision: "bf16-mixed"

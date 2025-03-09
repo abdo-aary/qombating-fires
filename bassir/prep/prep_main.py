@@ -9,7 +9,7 @@ from bassir.utils.settings import STORAGE_PATH, DATA_CONFIGS_PATH
 
 @hydra.main(config_path=DATA_CONFIGS_PATH, config_name="wildfires")
 def main(cfg: DictConfig):
-    wildfire_path = os.path.join(STORAGE_PATH, "data", cfg.name, cfg.name + "_data.csv")
+    wildfire_path = os.path.join(STORAGE_PATH, "dataset", cfg.name, cfg.name + "_data.csv")
     dataset = WildfireWindowDataset(
         data_csv_path=wildfire_path,
         date_col="DATE",
@@ -22,7 +22,7 @@ def main(cfg: DictConfig):
         val_ratio=cfg.loader.specs.val_ratio,
         bal_factor=cfg.specs.bal_factor
     )
-    dataset_object_path = os.path.join(STORAGE_PATH, "data", cfg.name, "preprocessed_dataset.pkl")
+    dataset_object_path = os.path.join(STORAGE_PATH, "dataset", cfg.name, "preprocessed_dataset.pkl")
 
     dataset.save(dataset_object_path)
 

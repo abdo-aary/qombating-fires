@@ -30,7 +30,7 @@ def get_data_loaders(cfg: DictConfig) -> Tuple[DataLoader, DataLoader, DataLoade
                                               max_b_size=cfg.loader.specs.max_b_size)
 
     elif cfg.name in ["wildfires", "toy_wildfires"]:
-        dataset_object_path = os.path.join(STORAGE_PATH, "data", cfg.name, "preprocessed_dataset.pkl")
+        dataset_object_path = os.path.join(STORAGE_PATH, "dataset", cfg.name, "preprocessed_dataset.pkl")
         dataset = WildfireWindowDataset.load(dataset_object_path)
         return dataset.get_dataloaders(augmentation_factor=cfg.specs.augmentation_factor,
                                        train_b_size=cfg.loader.specs.train_b_size,

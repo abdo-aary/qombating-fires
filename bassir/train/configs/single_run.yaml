@@ -33,12 +33,3 @@ hydra:
     root:
       level: INFO
       handlers: [ file ]
-
-#  callbacks:
-#    save_job_info:
-#      _target_: hydra.experimental.callbacks.PickleJobInfoCallback
-
-#  job_logging:
-#    file:
-#      # Incorporates fix from https://github.com/facebookresearch/hydra/pull/2242
-#      filename: run.dir/log_file.log

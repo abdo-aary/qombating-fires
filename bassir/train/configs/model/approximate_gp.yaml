@@ -10,4 +10,5 @@ learning:
   lr_hyper: 1e-4
 
 defaults:
-  - kernel: embed_bassir  # This will look for model/kernel/rbf.yaml
+  - kernel: embed_bassir  # This will look for model/kernel/embed_bassir.yaml
+#   - kernel: rbf  # This will look for model/kernel/rbf.yaml

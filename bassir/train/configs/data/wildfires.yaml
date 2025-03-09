@@ -1,6 +1,6 @@
 name: wildfires
 specs:
-  window_size: 7
+  window_size: 7               # A window of 1 week
   bal_factor: 7
   augmentation_factor: 7
 defaults:
