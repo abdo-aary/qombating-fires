@@ -65,7 +65,7 @@ def solve_mis_with_pulser(graph, qpu_min_dist, qpu_max_dist, max_attempts=100000
     sequence.declare_channel('rydberg', 'rydberg_global')
 
     # Define a simple Rydberg pulse (values can be tuned)
-    pulse = Pulse.ConstantPulse(duration=6000, amplitude=6.5, detuning=-0.15, phase=0)
+    pulse = Pulse.ConstantPulse(duration=4000, amplitude=6.5, detuning=-0.25, phase=0)
     sequence.add(pulse, 'rydberg')
     sequence.measure()
 
@@ -103,16 +103,36 @@ fire_free_cells = df[df["IS_FIRE"] == 0]
 #We launch drones from Montréal
 selected_cell = df[(df["COORDINATES_LAT"] == 1) & (df["COORDINATES_LON"] == 25)].iloc[0]
 
+#We launch drones from Saguenay#
+#selected_cell = df[(df["COORDINATES_LAT"] == 13) & (df["COORDINATES_LON"] == 33)].iloc[0]
+
+#We launch drones from Gaspée
+#selected_cell = df[(df["COORDINATES_LAT"] == 14) & (df["COORDINATES_LON"] == 60)].iloc[0]
+
 tours = candidates.candidates_generation(selected_cell,df,800//20,1000,800,15)
 graph, isolated_vertex = utilities.tours_conflict_graph(tours,(800//20)//10)
 # Construction du graphe des tournées
-
+"""
 G = nx.Graph()
 G.add_edges_from(graph)
 qpu_min_dist = 5.0  # Example minimum distance constraint of the QPU
 qpu_max_dist = 38.0  # Example maximum distance constraint of the QPU
 mis,pos = solve_mis_with_pulser(G, qpu_min_dist, qpu_max_dist)
 print("Maximum Independent Set:", mis)
+
+MIS = list(mis)+isolated_vertex
+print("taille MIS ", len(MIS),MIS)
+
+selected_tours = sorted(list(MIS)[:budget])
+
+res= [tours[i][0] for i in selected_tours]
+
+# Convert the list of DataFrames into a single DataFrame
+df = pd.concat(res, ignore_index=True)
+
+# Save to CSV
+df.to_csv("resultsQ.csv", index=False)
+"""
 
 def plot_graph_with_mis(graph, mis_nodes, positions):
     """
@@ -134,4 +154,4 @@ def plot_graph_with_mis(graph, mis_nodes, positions):
 
 
 # Display the graph with MIS nodes in red
-plot_graph_with_mis(G, mis, pos)
+#plot_graph_with_mis(G, mis, pos)

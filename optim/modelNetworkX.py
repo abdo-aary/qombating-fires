@@ -34,6 +34,13 @@ MIS = list(independent_set)+isolated_vertex
 print("taille MIS ", len(MIS),MIS)
 
 selected_tours = sorted(list(MIS)[:budget])
+res= [tours[i][0] for i in selected_tours]
+
+# Convert the list of DataFrames into a single DataFrame
+df = pd.concat(res, ignore_index=True)
+
+# Save to CSV
+df.to_csv("resultsC.csv", index=False)
 
 """
 # Visualisation sur une grille
