@@ -4,8 +4,6 @@
 
 <div align="center">
 
-  ![Linting](https://github.com/abdo-aary/qombating-fires/actions/workflows/lint.yml/badge.svg) 
-  &nbsp;
   ![Testing](https://github.com/abdo-aary/qombating-fires/actions/workflows/testing.yml/badge.svg) 
   &nbsp;
   ![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
