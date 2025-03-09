@@ -4,12 +4,17 @@ import gpytorch
 import pytest
 from torch.utils.data import TensorDataset, DataLoader
 from bassir.models.factory.gp_models import ApproximateGP, PGLikelihood
+from bassir.models.quantum.bassir_kernel import BassirKernel
+from bassir.models.quantum.embed_bassir_kernel import EmbedBassirKernel, SimpleEmbedder
+from bassir.models.quantum.positioner import Positioner
+from bassir.models.quantum.rydberg import RydbergEvolver
+from bassir.utils.qutils import get_default_register_topology
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 torch.set_default_dtype(torch.float64)
 
 
-@pytest.fixture(params=["rbf", "bassir"])
+@pytest.fixture(params=["rbf", "bassir", "embed_bassir"])
 def kernel_setup(request):
     """
     Parameterized fixture for approximate GP testing.
@@ -69,16 +74,18 @@ def kernel_setup(request):
         if kernel_type == "rbf":
             kernel = gpytorch.kernels.ScaleKernel(gpytorch.kernels.RBFKernel())
         elif kernel_type == "bassir":
-            from bassir.models.quantum.bassir_kernel import BassirKernel
-            from bassir.models.quantum.positioner import Positioner
-            from bassir.models.quantum.rydberg import RydbergEvolver
-            from bassir.utils.qutils import get_default_register_topology
             n_qubits = 4
             dim = train_x.shape[-1]
             traps = get_default_register_topology(topology="all_to_all", n_qubits=n_qubits)
             positioner = Positioner(traps, dim=dim)
             evolver = RydbergEvolver(traps=traps, dim=dim)
             kernel = BassirKernel(traps=traps, positioner=positioner, evolver=evolver)
+        elif kernel_type == "embed_bassir":
+            n_qubits = 4
+            dim = train_x.shape[-1]
+            traps = get_default_register_topology(topology="all_to_all", n_qubits=n_qubits)
+            embedder = SimpleEmbedder(dim_in=dim, dim_out=dim * 2)
+            kernel = EmbedBassirKernel(traps=traps, embedder=embedder)
         else:
             raise ValueError("Unknown kernel type")
 

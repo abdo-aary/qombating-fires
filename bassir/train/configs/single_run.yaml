@@ -2,12 +2,12 @@
 
 defaults:
   - _self_
-  - data: complex_synthetic           # This should be set when running the script
+  - data: wildfires                   # This should be set when running the script
   - experiment: default_experiment    # This should be set when running the script
   - model: approximate_gp             # This should be set when running the script
 
 run_specs:
-  seed: 1234
+  seed: 12345
 
 hydra:
 
@@ -33,12 +33,3 @@ hydra:
     root:
       level: INFO
       handlers: [ file ]
-
-#  callbacks:
-#    save_job_info:
-#      _target_: hydra.experimental.callbacks.PickleJobInfoCallback
-
-#  job_logging:
-#    file:
-#      # Incorporates fix from https://github.com/facebookresearch/hydra/pull/2242
-#      filename: run.dir/log_file.log
