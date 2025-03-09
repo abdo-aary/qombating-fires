@@ -3,8 +3,8 @@ import rarfile
 import os
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-extract_to = os.path.join(current_dir,'..', '..', '..', 'storage', 'dataset')
-dataset_path = os.path.join(current_dir,'..', '..', '..', 'storage', 'dataset','data.rar')  # Remplacez le chemin du ZIP par celui du RAR
+extract_to = os.path.join(current_dir,'..', '..', '..', 'storage', 'dataset','wildfires')
+dataset_path = os.path.join(current_dir,'..', '..', '..', 'storage', 'dataset','wildfires','data.rar')  # Remplacez le chemin du ZIP par celui du RAR
 dataset_path = os.path.abspath(dataset_path)
 
 
