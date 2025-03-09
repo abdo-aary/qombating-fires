@@ -6,7 +6,7 @@ dataset_path = os.path.join(current_dir,'..', '..', '..', 'storage', 'dataset','
 dataset_path = os.path.abspath(dataset_path)
 
 dataset = "reanalysis-era5-single-levels"
-key = '684ab03f-dd8e-4c19-a669-b465462ef088'
+key = 'your_key'
 if key == 'your_key' :
     print("You need to replace the variable \'key\' with your API token on the website: https://cds.climate.copernicus.eu")
     sys.exit()
